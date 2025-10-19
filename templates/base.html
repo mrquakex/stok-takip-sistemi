@@ -653,22 +653,38 @@
         
         // Kamera barkod okuyucu
         document.addEventListener('DOMContentLoaded', function() {
-            // ZXing kütüphanesi yüklendikten sonra çalıştır
-            if (typeof ZXing !== 'undefined') {
-                codeReader = new ZXing.BrowserMultiFormatReader();
-                
-                // Kamera listesini al
-                codeReader.listVideoInputDevices()
-                    .then((videoInputDevices) => {
-                        cameras = videoInputDevices;
-                        if (cameras.length > 1) {
-                            document.getElementById('switchCamera').style.display = 'inline-block';
-                        }
-                    })
-                    .catch((err) => {
-                        console.error('Kamera listesi alınamadı:', err);
-                    });
+            // ZXing kütüphanesi yüklenmesini bekle
+            function initializeCamera() {
+                if (typeof ZXing !== 'undefined') {
+                    try {
+                        codeReader = new ZXing.BrowserMultiFormatReader();
+                        console.log('ZXing initialized successfully');
+                        
+                        // Kamera listesini al
+                        codeReader.listVideoInputDevices()
+                            .then((videoInputDevices) => {
+                                cameras = videoInputDevices;
+                                console.log('Cameras found:', cameras.length);
+                                if (cameras.length > 1) {
+                                    document.getElementById('switchCamera').style.display = 'inline-block';
+                                }
+                            })
+                            .catch((err) => {
+                                console.error('Kamera listesi alınamadı:', err);
+                                showError('Kamera bulunamadı: ' + err.message);
+                            });
+                    } catch (error) {
+                        console.error('ZXing initialization error:', error);
+                        showError('Barkod okuyucu başlatılamadı');
+                    }
+                } else {
+                    console.log('ZXing not loaded yet, retrying...');
+                    setTimeout(initializeCamera, 1000);
+                }
             }
+            
+            // 2 saniye bekle ve başlat
+            setTimeout(initializeCamera, 2000);
             
             // Floating kamera butonuna tıklama
             document.getElementById('openCameraBtn')?.addEventListener('click', function() {
@@ -711,41 +727,62 @@
         }
         
         function startCamera() {
-            if (!codeReader || cameras.length === 0) {
-                showError('Kamera bulunamadı veya desteklenmiyor');
+            console.log('Starting camera...');
+            
+            if (!codeReader) {
+                showError('Barkod okuyucu henüz hazır değil');
+                return;
+            }
+            
+            if (cameras.length === 0) {
+                showError('Kamera bulunamadı');
                 return;
             }
             
             const selectedDeviceId = cameras[currentCameraIndex]?.deviceId;
             const videoElement = document.getElementById('cameraPreview');
             
+            console.log('Using camera:', selectedDeviceId);
+            
             // Önceki stream'i durdur
             stopCamera();
             
-            codeReader.decodeFromVideoDevice(selectedDeviceId, videoElement, (result, err) => {
-                if (result) {
-                    const barcode = result.text;
-                    lastScannedBarcode = barcode;
-                    showScanResult(barcode);
+            // Kamera erişim izni kontrol et
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(() => {
+                    console.log('Camera permission granted');
                     
-                    // Titreşim efekti (destekleniyorsa)
-                    if (navigator.vibrate) {
-                        navigator.vibrate(200);
-                    }
-                }
-                
-                if (err && !(err instanceof ZXing.NotFoundException)) {
-                    console.error('Barkod okuma hatası:', err);
-                }
-            })
-            .then((stream) => {
-                currentStream = stream;
-                hideError();
-            })
-            .catch((err) => {
-                console.error('Kamera başlatma hatası:', err);
-                showError('Kamera erişimi reddedildi veya kullanılamıyor');
-            });
+                    codeReader.decodeFromVideoDevice(selectedDeviceId, videoElement, (result, err) => {
+                        if (result) {
+                            const barcode = result.text;
+                            console.log('Barcode found:', barcode);
+                            lastScannedBarcode = barcode;
+                            showScanResult(barcode);
+                            
+                            // Titreşim efekti (destekleniyorsa)
+                            if (navigator.vibrate) {
+                                navigator.vibrate(200);
+                            }
+                        }
+                        
+                        if (err && !(err instanceof ZXing.NotFoundException)) {
+                            console.error('Barkod okuma hatası:', err);
+                        }
+                    })
+                    .then((stream) => {
+                        currentStream = stream;
+                        console.log('Camera started successfully');
+                        hideError();
+                    })
+                    .catch((err) => {
+                        console.error('ZXing decode error:', err);
+                        showError('Barkod okuyucu başlatılamadı: ' + err.message);
+                    });
+                })
+                .catch((err) => {
+                    console.error('Camera permission denied:', err);
+                    showError('Kamera izni gerekli. Lütfen tarayıcı ayarlarından kamera erişimini açın.');
+                });
         }
         
         function stopCamera() {
