@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Stok Takip Sistemi{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/@zxing/library@latest/umd/index.min.js"></script>
+    <style>
+        :root {
+            --black: #000000;
+            --white: #ffffff;
+            --gray-light: #f8f9fa;
+            --gray-medium: #6c757d;
+            --gray-dark: #343a40;
+            --border-color: #dee2e6;
+            --transition: all 0.2s ease;
+        }
+
+        * {
+            transition: var(--transition);
+        }
+
+        body {
+            background: var(--white);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: var(--black);
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background: var(--black) !important;
+            border: none;
+            padding: 1rem 0;
+            box-shadow: none;
+        }
+
+        .navbar-brand {
+            font-weight: 600;
+            font-size: 1.25rem;
+            color: var(--white) !important;
+        }
+
+        .nav-link {
+            font-weight: 400;
+            color: var(--white) !important;
+            padding: 0.5rem 1rem !important;
+            border-radius: 0;
+        }
+
+        .nav-link:hover {
+            background: var(--gray-dark);
+            color: var(--white) !important;
+        }
+
+        .card {
+            border: 2px solid var(--black);
+            border-radius: 0 !important;
+            box-shadow: none;
+            background: var(--white);
+            margin-bottom: 2rem;
+        }
+
+        .card:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .card-header {
+            background: var(--black);
+            color: var(--white);
+            border: none;
+            border-radius: 0 !important;
+            padding: 1rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .btn {
+            border-radius: 0 !important;
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            border: 2px solid var(--black);
+            font-size: 0.9rem;
+            text-transform: none;
+            letter-spacing: normal;
+        }
+
+        .btn:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-primary {
+            background: var(--black);
+            color: var(--white);
+            border-color: var(--black);
+        }
+
+        .btn-primary:hover {
+            background: var(--white);
+            color: var(--black);
+            border-color: var(--black);
+        }
+
+        .btn-success {
+            background: var(--white);
+            color: var(--black);
+            border-color: var(--black);
+        }
+
+        .btn-success:hover {
+            background: var(--black);
+            color: var(--white);
+            border-color: var(--black);
+        }
+
+        .btn-warning {
+            background: var(--gray-light);
+            color: var(--black);
+            border-color: var(--black);
+        }
+
+        .btn-warning:hover {
+            background: var(--black);
+            color: var(--white);
+            border-color: var(--black);
+        }
+
+        .btn-danger {
+            background: var(--black);
+            color: var(--white);
+            border-color: var(--black);
+        }
+
+        .btn-danger:hover {
+            background: var(--white);
+            color: var(--black);
+            border-color: var(--black);
+        }
+
+        .btn-outline-primary,
+        .btn-outline-success,
+        .btn-outline-secondary,
+        .btn-outline-danger {
+            background: var(--white);
+            color: var(--black);
+            border-color: var(--black);
+        }
+
+        .btn-outline-primary:hover,
+        .btn-outline-success:hover,
+        .btn-outline-secondary:hover,
+        .btn-outline-danger:hover {
+            background: var(--black);
+            color: var(--white);
+            border-color: var(--black);
+        }
+
+        .btn-group-custom {
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .stats-card {
+            background: var(--black);
+            color: var(--white);
+            border: 2px solid var(--black);
+            border-radius: 0 !important;
+        }
+
+        .stats-card-success {
+            background: var(--white);
+            color: var(--black);
+            border: 2px solid var(--black);
+            border-radius: 0 !important;
+        }
+
+        .stats-card-warning {
+            background: var(--gray-light);
+            color: var(--black);
+            border: 2px solid var(--black);
+            border-radius: 0 !important;
+        }
+
+        .stats-card-danger {
+            background: var(--black);
+            color: var(--white);
+            border: 2px solid var(--black);
+            border-radius: 0 !important;
+        }
+
+        .stats-card:hover {
+            transform: none;
+        }
+
+        .stats-card .card-body {
+            padding: 2rem 1rem;
+        }
+
+        .stats-card h4 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .table {
+            border: 2px solid var(--black);
+            border-radius: 0 !important;
+            background: var(--white);
+            box-shadow: none;
+        }
+
+        .table thead th {
+            background: var(--black);
+            color: var(--white);
+            border: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: none;
+            letter-spacing: normal;
+            padding: 1rem 0.75rem;
+        }
+
+        .table tbody tr {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table tbody tr:hover {
+            background: var(--gray-light);
+            transform: none;
+        }
+
+        .table tbody td {
+            padding: 1rem 0.75rem;
+            vertical-align: middle;
+            color: var(--black);
+            font-weight: 400;
+        }
+
+        .barcode-input {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            background: var(--gray-light);
+            border: 1px solid var(--border-color);
+            border-radius: 0 !important;
+            padding: 0.25rem 0.5rem;
+            color: var(--black);
+        }
+
+        .badge {
+            border-radius: 0 !important;
+            padding: 0.5rem 0.75rem;
+            font-weight: 500;
+            font-size: 0.8rem;
+        }
+
+        .badge.bg-primary {
+            background: var(--black) !important;
+            color: var(--white);
+        }
+
+        .badge.bg-success {
+            background: var(--white) !important;
+            color: var(--black);
+            border: 1px solid var(--black);
+        }
+
+        .badge.bg-warning {
+            background: var(--gray-light) !important;
+            color: var(--black);
+            border: 1px solid var(--black);
+        }
+
+        .badge.bg-danger {
+            background: var(--black) !important;
+            color: var(--white);
+        }
+
+        .badge.bg-secondary {
+            background: var(--gray-medium) !important;
+            color: var(--white);
+        }
+
+        .alert {
+            border: 2px solid var(--black);
+            border-radius: 0 !important;
+            box-shadow: none;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: var(--white);
+            color: var(--black);
+            border-color: var(--black);
+        }
+
+        .alert-danger {
+            background: var(--black);
+            color: var(--white);
+            border-color: var(--black);
+        }
+
+        .alert-warning {
+            background: var(--gray-light);
+            color: var(--black);
+            border-color: var(--black);
+        }
+
+        .alert-info {
+            background: var(--white);
+            color: var(--black);
+            border-color: var(--black);
+        }
+
+        .form-control, .form-select {
+            border-radius: 0 !important;
+            border: 2px solid var(--black);
+            padding: 0.75rem;
+            background: var(--white);
+            color: var(--black);
+            font-size: 1rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--black);
+            box-shadow: none;
+            transform: none;
+            background: var(--gray-light);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--black);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer {
+            background: var(--black);
+            color: var(--white);
+            padding: 2rem 0;
+            margin-top: 3rem;
+            border: none;
+        }
+
+        /* Mobil optimizasyonları */
+        @media (max-width: 768px) {
+            .card {
+                margin-bottom: 1rem;
+            }
+            
+            .btn-group-custom {
+                justify-content: center;
+            }
+            
+            .stats-card {
+                margin-bottom: 1rem;
+            }
+            
+            .table-responsive {
+                border: 2px solid var(--black);
+            }
+
+            .stats-card h4 {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Kamera modal stilleri */
+        .camera-modal .modal-content {
+            border: 2px solid var(--black);
+            border-radius: 0 !important;
+            box-shadow: none;
+        }
+
+        .modal-header {
+            background: var(--black);
+            color: var(--white);
+            border-bottom: none;
+        }
+
+        .modal-body {
+            background: var(--white);
+            color: var(--black);
+        }
+
+        .modal-footer {
+            background: var(--white);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .camera-preview {
+            width: 100%;
+            max-width: 400px;
+            height: 300px;
+            border: 2px solid var(--black);
+            border-radius: 0 !important;
+            background: var(--black);
+            margin: 0 auto;
+            display: block;
+        }
+
+        .barcode-scanner-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 0 !important;
+            background: var(--black);
+            color: var(--white);
+            border: 2px solid var(--black);
+            z-index: 1000;
+        }
+
+        .barcode-scanner-btn:hover {
+            transform: none;
+            background: var(--white);
+            color: var(--black);
+            border-color: var(--black);
+        }
+
+        /* Animasyonları kaldır */
+        .fade-in-up {
+            animation: none;
+        }
+
+        .pulse {
+            animation: none;
+        }
+
+        /* Input group düzenlemeleri */
+        .input-group .form-control {
+            border-right: none;
+        }
+
+        .input-group .btn {
+            border-left: none;
+        }
+
+        /* Dropdown menüler */
+        .dropdown-menu {
+            border: 2px solid var(--black);
+            border-radius: 0 !important;
+            box-shadow: none;
+        }
+
+        .dropdown-item {
+            color: var(--black);
+            padding: 0.75rem 1rem;
+        }
+
+        .dropdown-item:hover {
+            background: var(--gray-light);
+            color: var(--black);
+        }
+
+        /* Toast bildirimleri */
+        .toast {
+            border: 2px solid var(--black);
+            border-radius: 0 !important;
+            box-shadow: none;
+        }
+
+        .toast.bg-success {
+            background: var(--white) !important;
+            color: var(--black);
+        }
+
+        .toast.bg-danger {
+            background: var(--black) !important;
+            color: var(--white);
+        }
+
+        .toast.bg-primary {
+            background: var(--black) !important;
+            color: var(--white);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-boxes me-2"></i>Stok Takip Sistemi
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">
+                            <i class="fas fa-home me-1"></i>Ana Sayfa
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('urun_ekle') }}">
+                            <i class="fas fa-plus me-1"></i>Ürün Ekle
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dusuk_stok') }}">
+                            <i class="fas fa-exclamation-triangle me-1"></i>Düşük Stok
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-download me-1"></i>Raporlar
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('excel_aktar') }}">
+                                <i class="fas fa-file-excel me-2"></i>Excel Dışa Aktar
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('pdf_rapor') }}">
+                                <i class="fas fa-file-pdf me-2"></i>PDF Rapor
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <form class="d-flex" method="GET" action="{{ url_for('ara') }}">
+                    <input class="form-control me-2" type="search" name="q" placeholder="Ürün adı veya barkod..." aria-label="Search">
+                    <button class="btn btn-outline-light" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    <div class="container mt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
+                        <i class="fas fa-{{ 'exclamation-circle' if category == 'error' else 'check-circle' }} me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Mobil Kamera Barkod Okuyucu Modal -->
+    <div class="modal fade camera-modal" id="cameraModal" tabindex="-1" aria-labelledby="cameraModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cameraModalLabel">
+                        <i class="fas fa-camera me-2"></i>Barkod Okuyucu
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="mb-3">
+                        <p class="text-muted">Barkodu kamera görüntüsü içinde ortalayın</p>
+                    </div>
+                    <video id="cameraPreview" class="camera-preview" autoplay muted playsinline></video>
+                    <div class="mt-3">
+                        <div id="scanResult" class="alert alert-success d-none">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <strong>Barkod Bulundu:</strong> <span id="scannedBarcode"></span>
+                        </div>
+                        <div id="scanError" class="alert alert-danger d-none">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <span id="errorMessage">Kamera erişimi sağlanamadı</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Kapat
+                    </button>
+                    <button type="button" class="btn btn-primary" id="switchCamera" style="display: none;">
+                        <i class="fas fa-sync-alt me-1"></i>Kamera Değiştir
+                    </button>
+                    <button type="button" class="btn btn-success" id="useBarcode" style="display: none;">
+                        <i class="fas fa-check me-1"></i>Barkodu Kullan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Kamera Butonu (Sadece mobil cihazlarda görünür) -->
+    <button class="barcode-scanner-btn pulse d-md-none" id="openCameraBtn" title="Kamera ile Barkod Oku">
+        <i class="fas fa-camera fa-lg"></i>
+    </button>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0">&copy; 2024 Stok Takip Sistemi. Tüm hakları saklıdır.</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p class="mb-0">Python Flask ile geliştirilmiştir.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Barkod Okuyucu Script -->
+    <script>
+        let barcodeBuffer = '';
+        let barcodeTimeout;
+        let codeReader = null;
+        let currentStream = null;
+        let cameras = [];
+        let currentCameraIndex = 0;
+        let lastScannedBarcode = '';
+        
+        // Klavye barkod okuyucu
+        document.addEventListener('keydown', function(e) {
+            // Eğer bir input alanında değilsek barkod okumayı aktif et
+            if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+                return;
+            }
+            
+            // Barkod okuyucu genellikle hızlı bir şekilde karakterleri gönderir
+            clearTimeout(barcodeTimeout);
+            
+            if (e.key === 'Enter') {
+                if (barcodeBuffer.length > 5) { // Minimum barkod uzunluğu
+                    handleBarcodeScanned(barcodeBuffer);
+                }
+                barcodeBuffer = '';
+            } else if (e.key.length === 1) {
+                barcodeBuffer += e.key;
+                barcodeTimeout = setTimeout(() => {
+                    barcodeBuffer = '';
+                }, 100); // 100ms timeout
+            }
+        });
+        
+        // Kamera barkod okuyucu
+        document.addEventListener('DOMContentLoaded', function() {
+            // ZXing kütüphanesi yüklendikten sonra çalıştır
+            if (typeof ZXing !== 'undefined') {
+                codeReader = new ZXing.BrowserMultiFormatReader();
+                
+                // Kamera listesini al
+                codeReader.listVideoInputDevices()
+                    .then((videoInputDevices) => {
+                        cameras = videoInputDevices;
+                        if (cameras.length > 1) {
+                            document.getElementById('switchCamera').style.display = 'inline-block';
+                        }
+                    })
+                    .catch((err) => {
+                        console.error('Kamera listesi alınamadı:', err);
+                    });
+            }
+            
+            // Floating kamera butonuna tıklama
+            document.getElementById('openCameraBtn')?.addEventListener('click', function() {
+                openCameraModal();
+            });
+            
+            // Modal kapanırken kamerayı durdur
+            document.getElementById('cameraModal').addEventListener('hidden.bs.modal', function() {
+                stopCamera();
+            });
+            
+            // Kamera değiştirme butonu
+            document.getElementById('switchCamera').addEventListener('click', function() {
+                switchCamera();
+            });
+            
+            // Barkodu kullan butonu
+            document.getElementById('useBarcode').addEventListener('click', function() {
+                if (lastScannedBarcode) {
+                    handleBarcodeScanned(lastScannedBarcode);
+                    bootstrap.Modal.getInstance(document.getElementById('cameraModal')).hide();
+                }
+            });
+            
+            // Animasyonları başlat
+            document.querySelectorAll('.card, .stats-card').forEach((element, index) => {
+                element.style.animationDelay = `${index * 0.1}s`;
+                element.classList.add('fade-in-up');
+            });
+        });
+        
+        function openCameraModal() {
+            const modal = new bootstrap.Modal(document.getElementById('cameraModal'));
+            modal.show();
+            
+            // Modal açıldıktan sonra kamerayı başlat
+            setTimeout(() => {
+                startCamera();
+            }, 500);
+        }
+        
+        function startCamera() {
+            if (!codeReader || cameras.length === 0) {
+                showError('Kamera bulunamadı veya desteklenmiyor');
+                return;
+            }
+            
+            const selectedDeviceId = cameras[currentCameraIndex]?.deviceId;
+            const videoElement = document.getElementById('cameraPreview');
+            
+            // Önceki stream'i durdur
+            stopCamera();
+            
+            codeReader.decodeFromVideoDevice(selectedDeviceId, videoElement, (result, err) => {
+                if (result) {
+                    const barcode = result.text;
+                    lastScannedBarcode = barcode;
+                    showScanResult(barcode);
+                    
+                    // Titreşim efekti (destekleniyorsa)
+                    if (navigator.vibrate) {
+                        navigator.vibrate(200);
+                    }
+                }
+                
+                if (err && !(err instanceof ZXing.NotFoundException)) {
+                    console.error('Barkod okuma hatası:', err);
+                }
+            })
+            .then((stream) => {
+                currentStream = stream;
+                hideError();
+            })
+            .catch((err) => {
+                console.error('Kamera başlatma hatası:', err);
+                showError('Kamera erişimi reddedildi veya kullanılamıyor');
+            });
+        }
+        
+        function stopCamera() {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
+            }
+            
+            if (codeReader) {
+                codeReader.reset();
+            }
+            
+            hideScanResult();
+            hideError();
+        }
+        
+        function switchCamera() {
+            if (cameras.length > 1) {
+                currentCameraIndex = (currentCameraIndex + 1) % cameras.length;
+                startCamera();
+            }
+        }
+        
+        function showScanResult(barcode) {
+            document.getElementById('scannedBarcode').textContent = barcode;
+            document.getElementById('scanResult').classList.remove('d-none');
+            document.getElementById('useBarcode').style.display = 'inline-block';
+            
+            // 3 saniye sonra otomatik kullan
+            setTimeout(() => {
+                if (lastScannedBarcode === barcode) {
+                    document.getElementById('useBarcode').click();
+                }
+            }, 3000);
+        }
+        
+        function hideScanResult() {
+            document.getElementById('scanResult').classList.add('d-none');
+            document.getElementById('useBarcode').style.display = 'none';
+            lastScannedBarcode = '';
+        }
+        
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('scanError').classList.remove('d-none');
+        }
+        
+        function hideError() {
+            document.getElementById('scanError').classList.add('d-none');
+        }
+        
+        function handleBarcodeScanned(barcode) {
+            // Barkod input alanı varsa doldur
+            const barcodeInput = document.getElementById('barkod');
+            if (barcodeInput) {
+                barcodeInput.value = barcode;
+                barcodeInput.focus();
+                
+                // Eğer ürün ekleme sayfasındaysak, ürün bilgilerini getir
+                if (window.location.pathname === '/urun_ekle') {
+                    fetchProductByBarcode(barcode);
+                }
+            } else {
+                // Ana sayfadaysak arama yap
+                window.location.href = `/ara?q=${barcode}`;
+            }
+        }
+        
+        function fetchProductByBarcode(barcode) {
+            fetch(`/barkod_ara/${barcode}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.log('Yeni ürün için barkod hazır:', barcode);
+                        // Toast bildirimi göster
+                        showToast('Yeni ürün için barkod hazır!', 'success');
+                    } else {
+                        // Ürün bulundu, bilgileri doldur
+                        document.getElementById('ad').value = data.ad;
+                        document.getElementById('stok_adedi').value = data.stok_adedi;
+                        document.getElementById('birim_fiyat').value = data.birim_fiyat;
+                        document.getElementById('kategori').value = data.kategori;
+                        document.getElementById('aciklama').value = data.aciklama || '';
+                        
+                        showToast('Ürün bilgileri dolduruldu!', 'info');
+                    }
+                })
+                .catch(error => {
+                    console.error('Barkod arama hatası:', error);
+                    showToast('Barkod arama sırasında hata oluştu', 'error');
+                });
+        }
+        
+        // Toast bildirimi
+        function showToast(message, type = 'info') {
+            const toastContainer = document.getElementById('toastContainer') || createToastContainer();
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white bg-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'primary'} border-0`;
+            toast.setAttribute('role', 'alert');
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            
+            // Toast kaldırıldıktan sonra DOM'dan sil
+            toast.addEventListener('hidden.bs.toast', () => {
+                toast.remove();
+            });
+        }
+        
+        function createToastContainer() {
+            const container = document.createElement('div');
+            container.id = 'toastContainer';
+            container.className = 'toast-container position-fixed top-0 end-0 p-3';
+            container.style.zIndex = '1055';
+            document.body.appendChild(container);
+            return container;
+        }
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

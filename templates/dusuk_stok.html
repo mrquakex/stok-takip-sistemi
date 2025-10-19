@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+
+{% block title %}Düşük Stok Uyarısı - Stok Takip Sistemi{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Düşük Stok Uyarısı
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Uyarı:</strong> Stok adedi {{ limit }} veya daha az olan ürünler listelenmektedir.
+                    Bu ürünlerin stokları tükenmek üzere!
+                </div>
+                
+                <!-- Filtre Seçenekleri -->
+                <form method="GET" class="mb-4">
+                    <div class="row align-items-end">
+                        <div class="col-md-3">
+                            <label for="limit" class="form-label">Stok Limiti</label>
+                            <select class="form-select" id="limit" name="limit" onchange="this.form.submit()">
+                                <option value="5" {{ 'selected' if limit == 5 }}>5 ve altı</option>
+                                <option value="10" {{ 'selected' if limit == 10 }}>10 ve altı</option>
+                                <option value="20" {{ 'selected' if limit == 20 }}>20 ve altı</option>
+                                <option value="50" {{ 'selected' if limit == 50 }}>50 ve altı</option>
+                            </select>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="btn-group-custom d-flex gap-2">
+                                <button type="button" class="btn btn-outline-primary" onclick="window.print()">
+                                    <i class="fas fa-print me-1"></i>Yazdır
+                                </button>
+                                <a href="{{ url_for('excel_aktar') }}?dusuk_stok={{ limit }}" class="btn btn-outline-success">
+                                    <i class="fas fa-file-excel me-1"></i>Excel'e Aktar
+                                </a>
+                                <a href="{{ url_for('pdf_rapor') }}?dusuk_stok={{ limit }}" class="btn btn-outline-danger">
+                                    <i class="fas fa-file-pdf me-1"></i>PDF Rapor
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                
+                {% if urunler %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-danger">
+                            <tr>
+                                <th>Öncelik</th>
+                                <th>Ürün Adı</th>
+                                <th>Barkod</th>
+                                <th>Kategori</th>
+                                <th>Kalan Stok</th>
+                                <th>Birim Fiyat</th>
+                                <th>Kalan Değer</th>
+                                <th>Son Güncelleme</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for urun in urunler|sort(attribute='stok_adedi') %}
+                            <tr class="{% if urun.stok_adedi == 0 %}table-danger{% elif urun.stok_adedi <= 5 %}table-warning{% endif %}">
+                                <td>
+                                    {% if urun.stok_adedi == 0 %}
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-times-circle me-1"></i>KRİTİK
+                                    </span>
+                                    {% elif urun.stok_adedi <= 3 %}
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>YÜKSEK
+                                    </span>
+                                    {% elif urun.stok_adedi <= 10 %}
+                                    <span class="badge bg-info">
+                                        <i class="fas fa-info-circle me-1"></i>ORTA
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">
+                                        <i class="fas fa-check-circle me-1"></i>DÜŞÜK
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong>{{ urun.ad }}</strong>
+                                    {% if urun.aciklama %}
+                                    <br><small class="text-muted">{{ urun.aciklama[:40] }}{% if urun.aciklama|length > 40 %}...{% endif %}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <code class="barcode-input">{{ urun.barkod }}</code>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ urun.kategori }}</span>
+                                </td>
+                                <td>
+                                    {% if urun.stok_adedi == 0 %}
+                                    <span class="badge bg-danger fs-6">
+                                        <i class="fas fa-times me-1"></i>TÜKENDİ
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-warning text-dark fs-6">
+                                        {{ urun.stok_adedi }} adet
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ "%.2f"|format(urun.birim_fiyat) }} ₺</td>
+                                <td>
+                                    <strong class="{% if urun.stok_adedi == 0 %}text-danger{% else %}text-warning{% endif %}">
+                                        {{ "%.2f"|format(urun.toplam_deger) }} ₺
+                                    </strong>
+                                </td>
+                                <td>
+                                    <small>{{ urun.guncelleme_tarihi.strftime('%d.%m.%Y %H:%M') }}</small>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="{{ url_for('urun_duzenle', id=urun.id) }}" 
+                                           class="btn btn-outline-success" title="Stok Güncelle">
+                                            <i class="fas fa-plus"></i>
+                                        </a>
+                                        <a href="{{ url_for('urun_duzenle', id=urun.id) }}" 
+                                           class="btn btn-outline-primary" title="Düzenle">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Özet Bilgiler -->
+                <div class="row mt-4">
+                    <div class="col-md-3">
+                        <div class="card bg-danger text-white">
+                            <div class="card-body text-center">
+                                <h5>{{ urunler|selectattr('stok_adedi', '==', 0)|list|length }}</h5>
+                                <small>Tükenen Ürün</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-warning text-dark">
+                            <div class="card-body text-center">
+                                <h5>{{ urunler|selectattr('stok_adedi', '>', 0)|selectattr('stok_adedi', '<=', 5)|list|length }}</h5>
+                                <small>Kritik Seviye (1-5)</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-info text-white">
+                            <div class="card-body text-center">
+                                <h5>{{ urunler|length }}</h5>
+                                <small>Toplam Düşük Stok</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-secondary text-white">
+                            <div class="card-body text-center">
+                                <h5>{{ "%.2f"|format(urunler|sum(attribute='toplam_deger')) }} ₺</h5>
+                                <small>Kalan Değer</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Öneriler -->
+                <div class="mt-4">
+                    <div class="card border-info">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">
+                                <i class="fas fa-lightbulb me-2"></i>Stok Yönetimi Önerileri
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-exclamation-triangle text-danger me-2"></i>Acil Eylem Gereken:</h6>
+                                    <ul class="list-unstyled">
+                                        {% for urun in urunler if urun.stok_adedi == 0 %}
+                                        <li class="text-danger">
+                                            <i class="fas fa-times-circle me-1"></i>
+                                            <strong>{{ urun.ad }}</strong> - Stok tükendi!
+                                        </li>
+                                        {% endfor %}
+                                        {% if urunler|selectattr('stok_adedi', '==', 0)|list|length == 0 %}
+                                        <li class="text-success">
+                                            <i class="fas fa-check-circle me-1"></i>Tükenen ürün yok
+                                        </li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-shopping-cart text-warning me-2"></i>Tedarik Edilmesi Gerekenler:</h6>
+                                    <ul class="list-unstyled">
+                                        {% for urun in urunler if urun.stok_adedi > 0 and urun.stok_adedi <= 5 %}
+                                        <li class="text-warning">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>
+                                            <strong>{{ urun.ad }}</strong> - {{ urun.stok_adedi }} adet kaldı
+                                        </li>
+                                        {% endfor %}
+                                        {% if urunler|selectattr('stok_adedi', '>', 0)|selectattr('stok_adedi', '<=', 5)|list|length == 0 %}
+                                        <li class="text-success">
+                                            <i class="fas fa-check-circle me-1"></i>Kritik seviyede ürün yok
+                                        </li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                    <h5 class="text-success">Harika! Düşük stoklu ürün bulunmuyor</h5>
+                    <p class="text-muted">
+                        Stok adedi {{ limit }} veya daha az olan ürün bulunmamaktadır.
+                    </p>
+                    <div class="mt-4">
+                        <a href="{{ url_for('index') }}" class="btn btn-primary">
+                            <i class="fas fa-arrow-left me-1"></i>Ana Sayfaya Dön
+                        </a>
+                        <a href="{{ url_for('urun_ekle') }}" class="btn btn-success">
+                            <i class="fas fa-plus me-1"></i>Yeni Ürün Ekle
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hızlı Stok Güncelleme Modal -->
+{% if urunler %}
+<div class="modal fade" id="stokGuncelleModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Hızlı Stok Güncelleme</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="hizliStokForm">
+                    <div class="mb-3">
+                        <label for="urunSelect" class="form-label">Ürün Seçin</label>
+                        <select class="form-select" id="urunSelect" required>
+                            <option value="">Ürün seçin...</option>
+                            {% for urun in urunler %}
+                            <option value="{{ urun.id }}" data-current="{{ urun.stok_adedi }}">
+                                {{ urun.ad }} (Mevcut: {{ urun.stok_adedi }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="yeniStok" class="form-label">Yeni Stok Adedi</label>
+                        <input type="number" class="form-control" id="yeniStok" min="0" required>
+                        <div class="form-text">
+                            Mevcut stok: <span id="mevcutStok">-</span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-success" onclick="hizliStokGuncelle()">
+                    <i class="fas fa-save me-1"></i>Güncelle
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hızlı Güncelleme Butonu -->
+<div class="position-fixed bottom-0 end-0 p-3">
+    <button class="btn btn-success btn-lg rounded-circle" data-bs-toggle="modal" data-bs-target="#stokGuncelleModal" title="Hızlı Stok Güncelleme">
+        <i class="fas fa-plus fa-lg"></i>
+    </button>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Ürün seçimi değiştiğinde mevcut stoku göster
+    document.getElementById('urunSelect')?.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const mevcutStok = selectedOption.getAttribute('data-current') || '-';
+        document.getElementById('mevcutStok').textContent = mevcutStok;
+        document.getElementById('yeniStok').value = mevcutStok;
+    });
+    
+    // Hızlı stok güncelleme
+    function hizliStokGuncelle() {
+        const urunId = document.getElementById('urunSelect').value;
+        const yeniStok = document.getElementById('yeniStok').value;
+        
+        if (!urunId || !yeniStok) {
+            alert('Lütfen ürün seçin ve yeni stok adedini girin!');
+            return;
+        }
+        
+        if (confirm(`Seçilen ürünün stoğu ${yeniStok} olarak güncellenecek. Onaylıyor musunuz?`)) {
+            // Bu örnekte doğrudan düzenleme sayfasına yönlendiriyoruz
+            // Gerçek uygulamada AJAX ile güncelleme yapılabilir
+            window.location.href = `/urun_duzenle/${urunId}`;
+        }
+    }
+    
+    // Sayfa yüklendiğinde
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Düşük stok sayfası hazır.');
+        
+        // Eğer kritik ürün varsa uyarı göster
+        const kritiUrunSayisi = {{ urunler|selectattr('stok_adedi', '==', 0)|list|length }};
+        if (kritiUrunSayisi > 0) {
+            setTimeout(() => {
+                if (confirm(`${kritiUrunSayisi} ürününüzün stoğu tükenmiş! Hemen stok güncellemesi yapmak ister misiniz?`)) {
+                    document.querySelector('[data-bs-target="#stokGuncelleModal"]')?.click();
+                }
+            }, 1000);
+        }
+    });
+    
+    // Yazdırma için stil ayarları
+    window.addEventListener('beforeprint', function() {
+        document.querySelectorAll('.btn, .modal, .position-fixed').forEach(el => {
+            el.style.display = 'none';
+        });
+    });
+    
+    window.addEventListener('afterprint', function() {
+        document.querySelectorAll('.btn, .modal, .position-fixed').forEach(el => {
+            el.style.display = '';
+        });
+    });
+</script>
+{% endblock %}

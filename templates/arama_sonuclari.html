@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% block title %}Arama Sonuçları - Stok Takip Sistemi{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-search me-2"></i>Arama Sonuçları
+                    {% if arama_terimi %}
+                    <span class="text-muted">- "{{ arama_terimi }}"</span>
+                    {% endif %}
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if arama_terimi %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>"{{ arama_terimi }}"</strong> için arama yapıldı. 
+                    <strong>{{ urunler|length }}</strong> sonuç bulundu.
+                </div>
+                {% endif %}
+                
+                <!-- Yeni Arama Formu -->
+                <form method="GET" action="{{ url_for('ara') }}" class="mb-4">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="q" 
+                               value="{{ arama_terimi }}" 
+                               placeholder="Ürün adı veya barkod numarası girin...">
+                        <button class="btn btn-outline-success" type="button" onclick="openCameraModal()" title="Kamera ile Barkod Oku">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fas fa-search me-1"></i>Ara
+                        </button>
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-1"></i>Temizle
+                        </a>
+                    </div>
+                </form>
+                
+                {% if urunler %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>ID</th>
+                                <th>Ürün Adı</th>
+                                <th>Barkod</th>
+                                <th>Kategori</th>
+                                <th>Stok</th>
+                                <th>Birim Fiyat</th>
+                                <th>Toplam Değer</th>
+                                <th>Son Güncelleme</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for urun in urunler %}
+                            <tr class="{{ 'table-warning' if urun.stok_adedi <= 10 else '' }}">
+                                <td>{{ urun.id }}</td>
+                                <td>
+                                    <strong>
+                                        {% if arama_terimi and arama_terimi.lower() in urun.ad.lower() %}
+                                            {{ urun.ad|replace(arama_terimi, '<mark>' + arama_terimi + '</mark>')|safe }}
+                                        {% else %}
+                                            {{ urun.ad }}
+                                        {% endif %}
+                                    </strong>
+                                    {% if urun.aciklama %}
+                                    <br><small class="text-muted">{{ urun.aciklama[:50] }}{% if urun.aciklama|length > 50 %}...{% endif %}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <code class="barcode-input">
+                                        {% if arama_terimi and arama_terimi in urun.barkod %}
+                                            {{ urun.barkod|replace(arama_terimi, '<mark>' + arama_terimi + '</mark>')|safe }}
+                                        {% else %}
+                                            {{ urun.barkod }}
+                                        {% endif %}
+                                    </code>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ urun.kategori }}</span>
+                                </td>
+                                <td>
+                                    {% if urun.stok_adedi <= 10 %}
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>{{ urun.stok_adedi }}
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-success">{{ urun.stok_adedi }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ "%.2f"|format(urun.birim_fiyat) }} ₺</td>
+                                <td><strong>{{ "%.2f"|format(urun.toplam_deger) }} ₺</strong></td>
+                                <td>
+                                    <small>{{ urun.guncelleme_tarihi.strftime('%d.%m.%Y %H:%M') }}</small>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="{{ url_for('urun_duzenle', id=urun.id) }}" 
+                                           class="btn btn-outline-primary" title="Düzenle">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{{ url_for('urun_sil', id=urun.id) }}" 
+                                           class="btn btn-outline-danger" 
+                                           onclick="return confirm('Bu ürünü silmek istediğinizden emin misiniz?')"
+                                           title="Sil">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Arama Sonuç Özeti -->
+                <div class="mt-4">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body text-center">
+                                    <h5>{{ urunler|length }}</h5>
+                                    <small>Bulunan Ürün</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <h5>{{ urunler|sum(attribute='stok_adedi') }}</h5>
+                                    <small>Toplam Stok</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body text-center">
+                                    <h5>{{ "%.2f"|format(urunler|sum(attribute='toplam_deger')) }} ₺</h5>
+                                    <small>Toplam Değer</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-dark">
+                                <div class="card-body text-center">
+                                    <h5>{{ urunler|selectattr('stok_adedi', '<=', 10)|list|length }}</h5>
+                                    <small>Düşük Stok</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% elif arama_terimi %}
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Arama sonucu bulunamadı</h5>
+                    <p class="text-muted">
+                        <strong>"{{ arama_terimi }}"</strong> için herhangi bir ürün bulunamadı.
+                    </p>
+                    <div class="mt-4">
+                        <h6>Arama önerileri:</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-lightbulb text-warning me-2"></i>Farklı anahtar kelimeler deneyin</li>
+                            <li><i class="fas fa-lightbulb text-warning me-2"></i>Daha kısa terimler kullanın</li>
+                            <li><i class="fas fa-lightbulb text-warning me-2"></i>Yazım hatası olup olmadığını kontrol edin</li>
+                            <li><i class="fas fa-lightbulb text-warning me-2"></i>Barkod numarasını tam olarak girin</li>
+                        </ul>
+                    </div>
+                    <a href="{{ url_for('urun_ekle') }}" class="btn btn-primary mt-3">
+                        <i class="fas fa-plus me-1"></i>Yeni Ürün Ekle
+                    </a>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Arama yapmak için yukarıdaki kutuyu kullanın</h5>
+                    <p class="text-muted">
+                        Ürün adı veya barkod numarası ile arama yapabilirsiniz.
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hızlı İşlemler -->
+{% if urunler %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-bolt me-2"></i>Hızlı İşlemler
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="btn-group-custom d-flex flex-wrap gap-2">
+                    <a href="{{ url_for('excel_aktar') }}?q={{ arama_terimi }}" class="btn btn-outline-success">
+                        <i class="fas fa-file-excel me-1"></i>Sonuçları Excel'e Aktar
+                    </a>
+                    <a href="{{ url_for('pdf_rapor') }}?q={{ arama_terimi }}" class="btn btn-outline-danger">
+                        <i class="fas fa-file-pdf me-1"></i>Sonuçları PDF'e Aktar
+                    </a>
+                    <button class="btn btn-outline-primary" onclick="yazdir()">
+                        <i class="fas fa-print me-1"></i>Sonuçları Yazdır
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Sayfa yüklendiğinde arama kutusuna focus ver
+    document.addEventListener('DOMContentLoaded', function() {
+        const aramaKutusu = document.querySelector('input[name="q"]');
+        if (aramaKutusu && !aramaKutusu.value) {
+            aramaKutusu.focus();
+        }
+        
+        console.log('Arama sayfası hazır. Barkod okuyucu aktif.');
+    });
+    
+    // Yazdırma fonksiyonu
+    function yazdir() {
+        const printContent = document.querySelector('.table-responsive').innerHTML;
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Arama Sonuçları - {{ arama_terimi }}</title>
+                    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+                    <style>
+                        @media print {
+                            .btn { display: none !important; }
+                            body { font-size: 12px; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <h3 class="text-center mb-4">Stok Takip Sistemi - Arama Sonuçları</h3>
+                        <p class="text-center"><strong>Arama Terimi:</strong> {{ arama_terimi }}</p>
+                        <p class="text-center"><strong>Tarih:</strong> ${new Date().toLocaleDateString('tr-TR')}</p>
+                        <hr>
+                        ${printContent}
+                    </div>
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.print();
+    }
+    
+    // Enter tuşu ile arama
+    document.querySelector('input[name="q"]').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            this.closest('form').submit();
+        }
+    });
+</script>
+{% endblock %}

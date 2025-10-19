@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+
+{% block title %}Ürün Düzenle - Stok Takip Sistemi{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-edit me-2"></i>Ürün Düzenle: {{ urun.ad }}
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Dikkat:</strong> Ürün bilgilerini güncellerken dikkatli olun. Değişiklikler kalıcı olacaktır.
+                </div>
+                
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="ad" class="form-label">
+                                    <i class="fas fa-tag me-1"></i>Ürün Adı *
+                                </label>
+                                <input type="text" class="form-control" id="ad" name="ad" required 
+                                       value="{{ urun.ad }}" placeholder="Ürün adını girin">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="barkod" class="form-label">
+                                    <i class="fas fa-barcode me-1"></i>Barkod Numarası *
+                                </label>
+                                <input type="text" class="form-control barcode-input" id="barkod" name="barkod" required 
+                                       value="{{ urun.barkod }}" placeholder="Barkod numarası">
+                                <div class="form-text">Barkod değiştirirken dikkatli olun</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="stok_adedi" class="form-label">
+                                    <i class="fas fa-boxes me-1"></i>Stok Adedi *
+                                </label>
+                                <input type="number" class="form-control" id="stok_adedi" name="stok_adedi" 
+                                       min="0" required value="{{ urun.stok_adedi }}">
+                                <div class="form-text">
+                                    Önceki değer: {{ urun.stok_adedi }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="birim_fiyat" class="form-label">
+                                    <i class="fas fa-lira-sign me-1"></i>Birim Fiyat (₺) *
+                                </label>
+                                <input type="number" class="form-control" id="birim_fiyat" name="birim_fiyat" 
+                                       step="0.01" min="0" required value="{{ urun.birim_fiyat }}">
+                                <div class="form-text">
+                                    Önceki değer: {{ "%.2f"|format(urun.birim_fiyat) }} ₺
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="kategori" class="form-label">
+                                    <i class="fas fa-folder me-1"></i>Kategori
+                                </label>
+                                <select class="form-select" id="kategori" name="kategori">
+                                    <option value="Genel" {{ 'selected' if urun.kategori == 'Genel' }}>Genel</option>
+                                    <option value="Elektronik" {{ 'selected' if urun.kategori == 'Elektronik' }}>Elektronik</option>
+                                    <option value="Gıda" {{ 'selected' if urun.kategori == 'Gıda' }}>Gıda</option>
+                                    <option value="Giyim" {{ 'selected' if urun.kategori == 'Giyim' }}>Giyim</option>
+                                    <option value="Ev & Yaşam" {{ 'selected' if urun.kategori == 'Ev & Yaşam' }}>Ev & Yaşam</option>
+                                    <option value="Kozmetik" {{ 'selected' if urun.kategori == 'Kozmetik' }}>Kozmetik</option>
+                                    <option value="Kitap & Kırtasiye" {{ 'selected' if urun.kategori == 'Kitap & Kırtasiye' }}>Kitap & Kırtasiye</option>
+                                    <option value="Spor" {{ 'selected' if urun.kategori == 'Spor' }}>Spor</option>
+                                    <option value="Oyuncak" {{ 'selected' if urun.kategori == 'Oyuncak' }}>Oyuncak</option>
+                                    <option value="Diğer" {{ 'selected' if urun.kategori == 'Diğer' }}>Diğer</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="aciklama" class="form-label">
+                            <i class="fas fa-comment me-1"></i>Açıklama
+                        </label>
+                        <textarea class="form-control" id="aciklama" name="aciklama" rows="3" 
+                                  placeholder="Ürün hakkında ek bilgiler (opsiyonel)">{{ urun.aciklama or '' }}</textarea>
+                    </div>
+                    
+                    <!-- Değer Karşılaştırması -->
+                    <div class="mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="fas fa-calculator me-1"></i>Değer Karşılaştırması
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card border-primary">
+                                            <div class="card-header bg-primary text-white text-center">
+                                                <small>Önceki Değer</small>
+                                            </div>
+                                            <div class="card-body text-center">
+                                                <h5>{{ "%.2f"|format(urun.toplam_deger) }} ₺</h5>
+                                                <small class="text-muted">
+                                                    {{ urun.stok_adedi }} × {{ "%.2f"|format(urun.birim_fiyat) }} ₺
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card border-success">
+                                            <div class="card-header bg-success text-white text-center">
+                                                <small>Yeni Değer</small>
+                                            </div>
+                                            <div class="card-body text-center">
+                                                <h5 id="yeni-toplam">{{ "%.2f"|format(urun.toplam_deger) }} ₺</h5>
+                                                <small class="text-muted">
+                                                    <span id="yeni-stok">{{ urun.stok_adedi }}</span> × 
+                                                    <span id="yeni-fiyat">{{ "%.2f"|format(urun.birim_fiyat) }}</span> ₺
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-center mt-3">
+                                    <div id="fark-gosterge" class="alert alert-info">
+                                        <strong>Fark:</strong> <span id="fark-miktar">0.00</span> ₺
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Ürün Bilgileri -->
+                    <div class="mb-3">
+                        <div class="card bg-info text-white">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="fas fa-info-circle me-1"></i>Ürün Bilgileri
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <small><strong>Oluşturma Tarihi:</strong> {{ urun.olusturma_tarihi.strftime('%d.%m.%Y %H:%M') }}</small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <small><strong>Son Güncelleme:</strong> {{ urun.guncelleme_tarihi.strftime('%d.%m.%Y %H:%M') }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('index') }}" class="btn btn-secondary me-md-2">
+                            <i class="fas fa-times me-1"></i>İptal
+                        </a>
+                        <a href="{{ url_for('urun_sil', id=urun.id) }}" 
+                           class="btn btn-danger me-md-2"
+                           onclick="return confirm('Bu ürünü silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!')">
+                            <i class="fas fa-trash me-1"></i>Ürünü Sil
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save me-1"></i>Değişiklikleri Kaydet
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Orijinal değerler
+    const orijinalStok = {{ urun.stok_adedi }};
+    const orijinalFiyat = {{ urun.birim_fiyat }};
+    const orijinalToplam = {{ urun.toplam_deger }};
+    
+    // Yeni değer hesaplama
+    function hesaplaYeniDeger() {
+        const yeniStok = parseFloat(document.getElementById('stok_adedi').value) || 0;
+        const yeniFiyat = parseFloat(document.getElementById('birim_fiyat').value) || 0;
+        const yeniToplam = yeniStok * yeniFiyat;
+        const fark = yeniToplam - orijinalToplam;
+        
+        document.getElementById('yeni-stok').textContent = yeniStok;
+        document.getElementById('yeni-fiyat').textContent = yeniFiyat.toFixed(2);
+        document.getElementById('yeni-toplam').textContent = yeniToplam.toFixed(2) + ' ₺';
+        document.getElementById('fark-miktar').textContent = fark.toFixed(2);
+        
+        // Fark göstergesinin rengini ayarla
+        const farkGosterge = document.getElementById('fark-gosterge');
+        farkGosterge.className = 'alert ';
+        
+        if (fark > 0) {
+            farkGosterge.className += 'alert-success';
+            document.getElementById('fark-miktar').textContent = '+' + fark.toFixed(2);
+        } else if (fark < 0) {
+            farkGosterge.className += 'alert-danger';
+        } else {
+            farkGosterge.className += 'alert-info';
+        }
+    }
+    
+    // Input değişikliklerini dinle
+    document.getElementById('stok_adedi').addEventListener('input', hesaplaYeniDeger);
+    document.getElementById('birim_fiyat').addEventListener('input', hesaplaYeniDeger);
+    
+    // Sayfa yüklendiğinde hesapla
+    document.addEventListener('DOMContentLoaded', function() {
+        hesaplaYeniDeger();
+        console.log('Ürün düzenleme sayfası hazır.');
+    });
+    
+    // Form submit öncesi kontrol
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const stokAdedi = parseFloat(document.getElementById('stok_adedi').value);
+        const birimFiyat = parseFloat(document.getElementById('birim_fiyat').value);
+        
+        if (stokAdedi < 0) {
+            alert('Stok adedi negatif olamaz!');
+            e.preventDefault();
+            return;
+        }
+        
+        if (birimFiyat < 0) {
+            alert('Birim fiyat negatif olamaz!');
+            e.preventDefault();
+            return;
+        }
+        
+        // Değişiklik kontrolü
+        const degisiklikVar = (
+            stokAdedi !== orijinalStok ||
+            birimFiyat !== orijinalFiyat ||
+            document.getElementById('ad').value !== '{{ urun.ad }}' ||
+            document.getElementById('barkod').value !== '{{ urun.barkod }}' ||
+            document.getElementById('kategori').value !== '{{ urun.kategori }}' ||
+            document.getElementById('aciklama').value !== '{{ urun.aciklama or "" }}'
+        );
+        
+        if (!degisiklikVar) {
+            alert('Herhangi bir değişiklik yapılmadı!');
+            e.preventDefault();
+            return;
+        }
+        
+        // Onay iste
+        const yeniToplam = stokAdedi * birimFiyat;
+        const fark = yeniToplam - orijinalToplam;
+        let mesaj = `Ürün güncellenecek.\n\nYeni toplam değer: ${yeniToplam.toFixed(2)} ₺\n`;
+        
+        if (fark !== 0) {
+            mesaj += `Değer farkı: ${fark > 0 ? '+' : ''}${fark.toFixed(2)} ₺\n`;
+        }
+        
+        mesaj += '\nOnaylıyor musunuz?';
+        
+        if (!confirm(mesaj)) {
+            e.preventDefault();
+        }
+    });
+</script>
+{% endblock %}
