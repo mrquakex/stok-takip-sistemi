@@ -13,7 +13,16 @@ import io
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'stok-takip-secret-key-2024'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///stok_takip.db'
+
+# Veritabanı konfigürasyonu
+database_url = os.environ.get('DATABASE_URL')
+if database_url:
+    # Railway PostgreSQL
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+else:
+    # Local development - SQLite
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///stok_takip.db'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
