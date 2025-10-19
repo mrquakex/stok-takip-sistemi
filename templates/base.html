@@ -6,7 +6,7 @@
     <title>{% block title %}Stok Takip Sistemi{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://unpkg.com/@zxing/library@latest/umd/index.min.js"></script>
+    <script src="https://unpkg.com/@zxing/library@0.20.0/umd/index.min.js"></script>
     <style>
         :root {
             --black: #000000;
@@ -747,26 +747,38 @@
             // Önceki stream'i durdur
             stopCamera();
             
-            // Kamera erişim izni kontrol et
-            navigator.mediaDevices.getUserMedia({ video: true })
+            // Kamera erişim izni kontrol et - daha iyi ayarlarla
+            navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    facingMode: 'environment', // Arka kamera tercih et
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                } 
+            })
                 .then(() => {
                     console.log('Camera permission granted');
                     
                     codeReader.decodeFromVideoDevice(selectedDeviceId, videoElement, (result, err) => {
                         if (result) {
                             const barcode = result.text;
-                            console.log('Barcode found:', barcode);
+                            console.log('✅ Barkod bulundu:', barcode);
                             lastScannedBarcode = barcode;
                             showScanResult(barcode);
                             
                             // Titreşim efekti (destekleniyorsa)
                             if (navigator.vibrate) {
-                                navigator.vibrate(200);
+                                navigator.vibrate([200, 100, 200]);
                             }
+                            
+                            // Ses efekti (opsiyonel)
+                            try {
+                                const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT');
+                                audio.play().catch(() => {}); // Ses çalmazsa sessizce devam et
+                            } catch(e) {}
                         }
                         
                         if (err && !(err instanceof ZXing.NotFoundException)) {
-                            console.error('Barkod okuma hatası:', err);
+                            console.warn('Barkod arama devam ediyor...', err.name);
                         }
                     })
                     .then((stream) => {
@@ -807,9 +819,14 @@
         }
         
         function showScanResult(barcode) {
+            console.log('🎯 Barkod işleniyor:', barcode);
+            
             document.getElementById('scannedBarcode').textContent = barcode;
             document.getElementById('scanResult').classList.remove('d-none');
             document.getElementById('useBarcode').style.display = 'inline-block';
+            
+            // Toast bildirimi göster
+            showToast(`✅ Barkod okundu: ${barcode}`, 'success');
             
             // 3 saniye sonra otomatik kullan
             setTimeout(() => {
