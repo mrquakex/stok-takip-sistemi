@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Çeliker Stok Sayım{% endblock %}
+
+{% block content %}
+<!-- Welcome Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="card-title mb-1">Hoş Geldiniz, {{ current_user.get_full_name() }}!</h2>
+                        <p class="card-text mb-0">
+                            <i class="fas fa-building me-2"></i>
+                            {% if current_user.company %}{{ current_user.company }}{% else %}Bireysel Kullanıcı{% endif %}
+                        </p>
+                    </div>
+                    <div class="text-end">
+                        <small class="text-muted">Son Giriş: {{ current_user.last_login.strftime('%d.%m.%Y %H:%M') if current_user.last_login else 'İlk Giriş' }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card stats-card">
+            <div class="card-body text-center">
+                <i class="fas fa-boxes fa-2x mb-3"></i>
+                <h4>{{ istatistikler.toplam_urun_sayisi }}</h4>
+                <p class="mb-0">Toplam Ürün</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stats-card-success">
+            <div class="card-body text-center">
+                <i class="fas fa-lira-sign fa-2x mb-3"></i>
+                <h4>{{ "%.2f"|format(istatistikler.toplam_stok_degeri) }} ₺</h4>
+                <p class="mb-0">Toplam Değer</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stats-card-warning">
+            <div class="card-body text-center">
+                <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                <h4>{{ istatistikler.dusuk_stoklu_urunler }}</h4>
+                <p class="mb-0">Düşük Stok</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stats-card-danger">
+            <div class="card-body text-center">
+                <i class="fas fa-times-circle fa-2x mb-3"></i>
+                <h4>{{ istatistikler.kritik_stoklu_urunler }}</h4>
+                <p class="mb-0">Kritik Stok</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-bolt me-2"></i>Hızlı İşlemler
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="btn-group-custom">
+                    <a href="{{ url_for('urun_ekle') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Yeni Ürün Ekle
+                    </a>
+                    <a href="{{ url_for('urun_listesi') }}" class="btn btn-success">
+                        <i class="fas fa-list me-2"></i>Ürün Listesi
+                    </a>
+                    <a href="{{ url_for('dusuk_stok') }}" class="btn btn-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Düşük Stok Uyarıları
+                    </a>
+                    <a href="{{ url_for('excel_aktar') }}" class="btn btn-secondary">
+                        <i class="fas fa-file-excel me-2"></i>Excel Dışa Aktar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Products & Low Stock Alerts -->
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-clock me-2"></i>Son Eklenen Ürünler
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if son_urunler %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Ürün Adı</th>
+                                    <th>Barkod</th>
+                                    <th>Stok</th>
+                                    <th>Fiyat</th>
+                                    <th>Tarih</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for urun in son_urunler %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ urun.ad }}</strong>
+                                        <br><small class="text-muted">{{ urun.kategori }}</small>
+                                    </td>
+                                    <td>
+                                        <code style="background: #333; color: #fff; padding: 2px 6px; border-radius: 4px;">
+                                            {{ urun.barkod }}
+                                        </code>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ 'danger' if urun.stok_durumu == 'kritik' else 'warning' if urun.stok_durumu == 'dusuk' else 'success' }}">
+                                            {{ urun.stok_adedi }}
+                                        </span>
+                                    </td>
+                                    <td>{{ "%.2f"|format(urun.birim_fiyat) }} ₺</td>
+                                    <td>
+                                        <small>{{ urun.olusturma_tarihi.strftime('%d.%m.%Y') }}</small>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('urun_listesi') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-list me-2"></i>Tüm Ürünleri Görüntüle
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4" style="background: #1a1a1a; border-radius: 12px; border: 2px solid #ffffff; padding: 3rem;">
+                        <i class="fas fa-box-open fa-4x mb-4" style="color: #ffffff;"></i>
+                        <h3 style="color: #ffffff; font-weight: 800; margin-bottom: 1rem;">Henüz ürün eklenmemiş</h3>
+                        <p style="color: #ffffff; font-size: 1.2rem; font-weight: 600; margin-bottom: 2rem;">İlk ürününüzü ekleyerek başlayın!</p>
+                        <a href="{{ url_for('urun_ekle') }}" class="btn btn-primary" style="padding: 1rem 2rem; font-size: 1.1rem; font-weight: 700;">
+                            <i class="fas fa-plus me-2"></i>İlk Ürünü Ekle
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Stok Uyarıları
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if dusuk_stok_urunler %}
+                    {% for urun in dusuk_stok_urunler %}
+                    <div class="alert alert-{{ 'danger' if urun.stok_durumu == 'kritik' else 'warning' }} py-2 mb-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ urun.ad }}</strong>
+                                <br><small>Stok: {{ urun.stok_adedi }}</small>
+                            </div>
+                            <span class="badge bg-{{ 'danger' if urun.stok_durumu == 'kritik' else 'warning' }}">
+                                {{ urun.stok_durumu.title() }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    {% if istatistikler.dusuk_stoklu_urunler > 5 %}
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('dusuk_stok') }}" class="btn btn-outline-warning btn-sm">
+                            <i class="fas fa-eye me-1"></i>{{ istatistikler.dusuk_stoklu_urunler - 5 }} Daha Fazla
+                        </a>
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                        <p class="mb-0 text-success">Tüm stoklar yeterli seviyede!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Category Statistics -->
+        {% if istatistikler.kategori_stats %}
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>Kategori Dağılımı
+                </h5>
+            </div>
+            <div class="card-body">
+                {% for kategori, stats in istatistikler.kategori_stats.items() %}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <strong>{{ kategori }}</strong>
+                        <br><small class="text-muted">{{ stats.count }} ürün</small>
+                    </div>
+                    <div class="text-end">
+                        <strong>{{ "%.0f"|format(stats.value) }} ₺</strong>
+                    </div>
+                </div>
+                {% if not loop.last %}<hr class="my-2">{% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Floating Action Button for Mobile -->
+<button class="barcode-scanner-btn pulse d-md-none" onclick="openCameraModal()" title="Kamera ile Barkod Oku">
+    <i class="fas fa-camera fa-lg"></i>
+</button>
+
+<!-- Camera Modal -->
+<div class="modal fade camera-modal" id="cameraModal" tabindex="-1" aria-labelledby="cameraModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cameraModalLabel">
+                    <i class="fas fa-camera me-2"></i>Barkod Okuyucu
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="mb-3">
+                    <p class="text-muted">Barkodu kamera görüntüsü içinde ortalayın</p>
+                </div>
+                <div id="scanner-container">
+                    <!-- Tarama Bilgi Paneli -->
+                    <div class="scan-info">
+                        <span class="status-dot"></span>
+                        <span id="scan-status-text">Kamera başlatılıyor...</span>
+                    </div>
+                    
+                    <!-- Profesyonel Tarama Çerçevesi -->
+                    <div class="scanner-frame">
+                        <div class="scanner-corners">
+                            <div class="scanner-corner top-left"></div>
+                            <div class="scanner-corner top-right"></div>
+                            <div class="scanner-corner bottom-left"></div>
+                            <div class="scanner-corner bottom-right"></div>
+                        </div>
+                        
+                        <!-- Animasyonlu Lazer Çizgisi -->
+                        <div class="laser-line"></div>
+                        
+                        <!-- Tarama Durumu -->
+                        <div class="scan-status">BARKOD ARANIYOR...</div>
+                        
+                        <!-- Başarı Efekti -->
+                        <div class="scan-success" id="scan-success-effect"></div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <div id="scanResult" class="alert alert-success d-none">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <strong>Barkod Bulundu:</strong> <span id="scannedBarcode"></span>
+                    </div>
+                    <div id="scanError" class="alert alert-danger d-none">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <span id="errorMessage">Kamera erişimi sağlanamadı</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Kapat
+                </button>
+                <button type="button" class="btn btn-primary" id="switchCamera" style="display: none;">
+                    <i class="fas fa-sync-alt me-1"></i>Kamera Değiştir
+                </button>
+                <button type="button" class="btn btn-success" id="useBarcode" style="display: none;">
+                    <i class="fas fa-check me-1"></i>Barkodu Kullan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

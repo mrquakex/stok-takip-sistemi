@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block title %}Ürün Ekle - Çeliker Stok Sayım{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-plus me-2"></i>Yeni Ürün Ekle
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Barkod Okuyucu:</strong> Barkod okuyucunuzla ürünün barkodunu okutabilir veya manuel olarak girebilirsiniz.
+                </div>
+                
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="ad" class="form-label">
+                                    <i class="fas fa-tag me-1"></i>Ürün Adı *
+                                </label>
+                                <input type="text" class="form-control" id="ad" name="ad" required 
+                                       placeholder="Ürün adını girin">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="barkod" class="form-label">
+                                    <i class="fas fa-barcode me-1"></i>Barkod Numarası *
+                                </label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control barcode-input" id="barkod" name="barkod" required 
+                                           placeholder="Barkod okutun veya manuel girin">
+                                    <button class="btn btn-outline-success" type="button" onclick="openCameraModal()" title="Kamera ile Barkod Oku">
+                                        <i class="fas fa-camera"></i>
+                                    </button>
+                                </div>
+                                <div class="form-text">
+                                    <i class="fas fa-keyboard me-1"></i>Barkod okuyucu ile otomatik doldurulacak
+                                    <span class="mx-2">|</span>
+                                    <i class="fas fa-camera me-1"></i>Kamera ile barkod okutabilirsiniz
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="stok_adedi" class="form-label">
+                                    <i class="fas fa-boxes me-1"></i>Stok Adedi *
+                                </label>
+                                <input type="number" class="form-control" id="stok_adedi" name="stok_adedi" 
+                                       min="0" required placeholder="0">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="birim_fiyat" class="form-label">
+                                    <i class="fas fa-lira-sign me-1"></i>Birim Fiyat (₺) *
+                                </label>
+                                <input type="number" class="form-control" id="birim_fiyat" name="birim_fiyat" 
+                                       step="0.01" min="0" required placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="kategori" class="form-label">
+                                    <i class="fas fa-folder me-1"></i>Kategori
+                                </label>
+                                <select class="form-select" id="kategori" name="kategori">
+                                    <option value="Genel">Genel</option>
+                                    <option value="Elektronik">Elektronik</option>
+                                    <option value="Gıda">Gıda</option>
+                                    <option value="Giyim">Giyim</option>
+                                    <option value="Ev & Yaşam">Ev & Yaşam</option>
+                                    <option value="Kozmetik">Kozmetik</option>
+                                    <option value="Kitap & Kırtasiye">Kitap & Kırtasiye</option>
+                                    <option value="Spor">Spor</option>
+                                    <option value="Oyuncak">Oyuncak</option>
+                                    <option value="Diğer">Diğer</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="aciklama" class="form-label">
+                            <i class="fas fa-comment me-1"></i>Açıklama
+                        </label>
+                        <textarea class="form-control" id="aciklama" name="aciklama" rows="3" 
+                                  placeholder="Ürün hakkında ek bilgiler (opsiyonel)"></textarea>
+                    </div>
+                    
+                    <!-- Toplam Değer Hesaplama -->
+                    <div class="mb-3">
+                        <div class="card" style="background: var(--gray-800); border: 1px solid var(--gray-600);">
+                            <div class="card-header" style="background: var(--white); color: var(--black);">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-calculator me-1"></i>Toplam Değer Hesaplama
+                                </h6>
+                            </div>
+                            <div class="card-body" style="background: var(--gray-800);">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong style="color: var(--white);">Stok Adedi:</strong> 
+                                        <span id="calc-stok" style="color: var(--gray-300);">0</span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong style="color: var(--white);">Birim Fiyat:</strong> 
+                                        <span id="calc-fiyat" style="color: var(--gray-300);">0.00</span> ₺
+                                    </div>
+                                </div>
+                                <hr style="border-color: var(--gray-600);">
+                                <div class="text-center">
+                                    <h5 style="color: var(--white);">
+                                        <strong>Toplam Değer: <span id="calc-toplam" style="color: var(--white);">0.00</span> ₺</strong>
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary me-md-2">
+                            <i class="fas fa-times me-1"></i>İptal
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save me-1"></i>Ürünü Kaydet
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Toplam değer hesaplama
+    function hesaplaToplam() {
+        const stokAdedi = parseFloat(document.getElementById('stok_adedi').value) || 0;
+        const birimFiyat = parseFloat(document.getElementById('birim_fiyat').value) || 0;
+        const toplam = stokAdedi * birimFiyat;
+        
+        document.getElementById('calc-stok').textContent = stokAdedi;
+        document.getElementById('calc-fiyat').textContent = birimFiyat.toFixed(2);
+        document.getElementById('calc-toplam').textContent = toplam.toFixed(2);
+    }
+    
+    // Input değişikliklerini dinle
+    document.getElementById('stok_adedi').addEventListener('input', hesaplaToplam);
+    document.getElementById('birim_fiyat').addEventListener('input', hesaplaToplam);
+    
+    // Sayfa yüklendiğinde hesapla
+    document.addEventListener('DOMContentLoaded', function() {
+        hesaplaToplam();
+        
+        // Barkod input'una focus ver
+        document.getElementById('barkod').focus();
+        
+        console.log('Ürün ekleme sayfası hazır. Barkod okuyucu aktif.');
+    });
+    
+    // Barkod input'u değiştiğinde ürün kontrolü yap
+    document.getElementById('barkod').addEventListener('blur', function() {
+        const barkod = this.value.trim();
+        if (barkod.length > 0) {
+            fetch(`/barkod_ara/${barkod}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.error) {
+                        // Ürün bulundu, kullanıcıya sor
+                        if (confirm('Bu barkoda ait bir ürün zaten mevcut. Bilgileri doldurmak ister misiniz?')) {
+                            document.getElementById('ad').value = data.ad;
+                            document.getElementById('stok_adedi').value = data.stok_adedi;
+                            document.getElementById('birim_fiyat').value = data.birim_fiyat;
+                            document.getElementById('kategori').value = data.kategori;
+                            document.getElementById('aciklama').value = data.aciklama || '';
+                            hesaplaToplam();
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.log('Yeni ürün için barkod hazır');
+                });
+        }
+    });
+    
+    // Form submit öncesi kontrol
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const stokAdedi = parseFloat(document.getElementById('stok_adedi').value);
+        const birimFiyat = parseFloat(document.getElementById('birim_fiyat').value);
+        
+        if (stokAdedi < 0) {
+            alert('Stok adedi negatif olamaz!');
+            e.preventDefault();
+            return;
+        }
+        
+        if (birimFiyat < 0) {
+            alert('Birim fiyat negatif olamaz!');
+            e.preventDefault();
+            return;
+        }
+        
+        // Onay iste
+        const toplam = stokAdedi * birimFiyat;
+        if (!confirm(`Ürün kaydedilecek. Toplam değer: ${toplam.toFixed(2)} ₺. Onaylıyor musunuz?`)) {
+            e.preventDefault();
+        }
+    });
+</script>
+{% endblock %}

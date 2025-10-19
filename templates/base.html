@@ -2,20 +2,38 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Stok Takip Sistemi{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Çeliker Stok">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>{% block title %}Çeliker Stok Sayım{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://unpkg.com/@zxing/library@0.20.0/umd/index.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
     <style>
         :root {
             --black: #000000;
             --white: #ffffff;
-            --gray-light: #f8f9fa;
-            --gray-medium: #6c757d;
-            --gray-dark: #343a40;
-            --border-color: #dee2e6;
-            --transition: all 0.2s ease;
+            --gray-50: #fafafa;
+            --gray-100: #f5f5f5;
+            --gray-200: #e5e5e5;
+            --gray-300: #d4d4d4;
+            --gray-400: #a3a3a3;
+            --gray-500: #737373;
+            --gray-600: #525252;
+            --gray-700: #404040;
+            --gray-800: #262626;
+            --gray-900: #171717;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * {
@@ -23,114 +41,190 @@
         }
 
         body {
-            background: var(--white);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            color: var(--black);
+            background: #000000;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #ffffff;
+            line-height: 1.7;
             font-size: 16px;
-            line-height: 1.6;
+            font-weight: 400;
+            letter-spacing: -0.02em;
+            font-feature-settings: 'liga' 1, 'kern' 1;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
+        /* TAM SİYAH NAVBAR */
         .navbar {
-            background: var(--black) !important;
-            border: none;
-            padding: 1rem 0;
-            box-shadow: none;
+            background: #000000 !important;
+            border-bottom: 2px solid #333333;
+            padding: 1.5rem 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
         }
 
         .navbar-brand {
-            font-weight: 600;
-            font-size: 1.25rem;
-            color: var(--white) !important;
+            font-family: 'Inter', sans-serif;
+            font-weight: 900;
+            font-size: 2rem;
+            color: #ffffff !important;
+            letter-spacing: -0.03em;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
         }
 
         .nav-link {
-            font-weight: 400;
-            color: var(--white) !important;
-            padding: 0.5rem 1rem !important;
-            border-radius: 0;
+            font-family: 'Inter', sans-serif;
+            color: #cccccc !important;
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 0.875rem 1.25rem !important;
+            border-radius: 12px;
+            margin: 0 0.25rem;
+            transition: all 0.2s ease;
+            letter-spacing: -0.01em;
         }
 
         .nav-link:hover {
-            background: var(--gray-dark);
-            color: var(--white) !important;
+            background: #1a1a1a;
+            color: #ffffff !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
         }
 
+        .nav-link.active {
+            background: #ffffff;
+            color: #000000 !important;
+            font-weight: 700;
+        }
+
+        /* OKUNUR KART SİSTEMİ */
         .card {
-            border: 2px solid var(--black);
-            border-radius: 0 !important;
-            box-shadow: none;
-            background: var(--white);
+            border: 3px solid #ffffff;
+            border-radius: 16px !important;
+            box-shadow: 0 8px 32px rgba(255, 255, 255, 0.1);
+            background: #1a1a1a;
             margin-bottom: 2rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
         }
 
         .card:hover {
-            transform: none;
-            box-shadow: none;
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px rgba(255, 255, 255, 0.2);
+            border-color: #ffffff;
         }
 
         .card-header {
-            background: var(--black);
-            color: var(--white);
+            background: #ffffff;
+            color: #000000;
             border: none;
             border-radius: 0 !important;
-            padding: 1rem;
-            font-weight: 600;
-            font-size: 1.1rem;
+            padding: 1.5rem 2rem;
+            font-family: 'Inter', sans-serif;
+            font-weight: 900;
+            font-size: 1.3rem;
+            letter-spacing: -0.02em;
         }
 
         .card-body {
-            padding: 1.5rem;
+            padding: 2.5rem 2rem;
+            background: #1a1a1a;
         }
 
+        .card-title {
+            font-family: 'Inter', sans-serif;
+            font-weight: 900;
+            font-size: 1.6rem;
+            color: #ffffff !important;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .card-text {
+            font-family: 'Inter', sans-serif;
+            color: #ffffff !important;
+            line-height: 1.7;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        /* TAM SİYAH BUTTON SYSTEM */
         .btn {
-            border-radius: 0 !important;
-            font-weight: 500;
-            padding: 0.75rem 1.5rem;
-            border: 2px solid var(--black);
+            font-family: 'Inter', sans-serif;
+            border-radius: 12px !important;
+            font-weight: 700;
+            padding: 1rem 2rem;
             font-size: 0.9rem;
+            letter-spacing: -0.01em;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
             text-transform: none;
-            letter-spacing: normal;
+            position: relative;
+            overflow: hidden;
         }
 
         .btn:hover {
-            transform: none;
-            box-shadow: none;
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
         }
 
         .btn-primary {
-            background: var(--black);
-            color: var(--white);
-            border-color: var(--black);
+            background: #ffffff;
+            color: #000000;
+            border-color: #ffffff;
+            font-weight: 800;
+        }
+
+        .form-control::placeholder {
+            color: #ffffff !important;
+            font-weight: 600 !important;
+            opacity: 0.8 !important;
         }
 
         .btn-primary:hover {
-            background: var(--white);
-            color: var(--black);
-            border-color: var(--black);
+            background: #f0f0f0;
+            color: #000000;
+            border-color: #f0f0f0;
+            box-shadow: 0 8px 24px rgba(255, 255, 255, 0.3);
         }
 
         .btn-success {
             background: var(--white);
-            color: var(--black);
-            border-color: var(--black);
+            color: var(--gray-900);
+            border-color: var(--gray-300);
         }
 
         .btn-success:hover {
-            background: var(--black);
-            color: var(--white);
-            border-color: var(--black);
+            background: var(--gray-50);
+            color: var(--black);
+            border-color: var(--gray-400);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-outline-success {
+            background: transparent;
+            color: var(--gray-700);
+            border-color: var(--gray-300);
+        }
+
+        .btn-outline-success:hover {
+            background: var(--gray-100);
+            color: var(--gray-900);
+            border-color: var(--gray-400);
         }
 
         .btn-warning {
-            background: var(--gray-light);
-            color: var(--black);
-            border-color: var(--black);
+            background: var(--gray-100);
+            color: var(--gray-900);
+            border-color: var(--gray-300);
         }
 
         .btn-warning:hover {
-            background: var(--black);
-            color: var(--white);
-            border-color: var(--black);
+            background: var(--gray-200);
+            color: var(--black);
+            border-color: var(--gray-400);
         }
 
         .btn-danger {
@@ -140,118 +234,201 @@
         }
 
         .btn-danger:hover {
-            background: var(--white);
-            color: var(--black);
-            border-color: var(--black);
-        }
-
-        .btn-outline-primary,
-        .btn-outline-success,
-        .btn-outline-secondary,
-        .btn-outline-danger {
-            background: var(--white);
-            color: var(--black);
-            border-color: var(--black);
-        }
-
-        .btn-outline-primary:hover,
-        .btn-outline-success:hover,
-        .btn-outline-secondary:hover,
-        .btn-outline-danger:hover {
-            background: var(--black);
+            background: var(--gray-800);
             color: var(--white);
-            border-color: var(--black);
+            border-color: var(--gray-800);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background: var(--gray-200);
+            color: var(--gray-900);
+            border-color: var(--gray-300);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-300);
+            color: var(--black);
+            border-color: var(--gray-400);
+        }
+
+        .btn-outline-secondary {
+            background: transparent;
+            color: var(--gray-600);
+            border-color: var(--gray-300);
+        }
+
+        .btn-outline-secondary:hover {
+            background: var(--gray-100);
+            color: var(--gray-900);
+            border-color: var(--gray-400);
         }
 
         .btn-group-custom {
-            gap: 0.5rem;
+            display: flex;
+            gap: 0.75rem;
             flex-wrap: wrap;
+            align-items: center;
         }
 
+        /* OKUNUR İSTATİSTİK KARTLARI */
         .stats-card {
-            background: var(--black);
-            color: var(--white);
-            border: 2px solid var(--black);
-            border-radius: 0 !important;
+            background: #1a1a1a;
+            color: #ffffff;
+            border: 3px solid #ffffff;
+            border-radius: 16px !important;
+            box-shadow: 0 8px 32px rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: relative;
         }
 
-        .stats-card-success {
-            background: var(--white);
-            color: var(--black);
-            border: 2px solid var(--black);
-            border-radius: 0 !important;
-        }
-
-        .stats-card-warning {
-            background: var(--gray-light);
-            color: var(--black);
-            border: 2px solid var(--black);
-            border-radius: 0 !important;
-        }
-
-        .stats-card-danger {
-            background: var(--black);
-            color: var(--white);
-            border: 2px solid var(--black);
-            border-radius: 0 !important;
+        .stats-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: #ffffff;
         }
 
         .stats-card:hover {
-            transform: none;
+            transform: translateY(-6px) scale(1.03);
+            box-shadow: 0 16px 48px rgba(255, 255, 255, 0.2);
+        }
+
+        .stats-card-success {
+            background: #1a1a1a;
+            color: #ffffff;
+            border: 3px solid #ffffff;
+            border-radius: 16px !important;
+        }
+
+        .stats-card-success::before {
+            background: #00ff00;
+        }
+
+        .stats-card-warning {
+            background: #1a1a1a;
+            color: #ffffff;
+            border: 3px solid #ffffff;
+            border-radius: 16px !important;
+        }
+
+        .stats-card-warning::before {
+            background: #ffff00;
+        }
+
+        .stats-card-danger {
+            background: #1a1a1a;
+            color: #ffffff;
+            border: 3px solid #ffffff;
+            border-radius: 16px !important;
+        }
+
+        .stats-card-danger::before {
+            background: #ff0000;
         }
 
         .stats-card .card-body {
-            padding: 2rem 1rem;
+            padding: 2.5rem 2rem;
+            position: relative;
+            z-index: 1;
         }
 
         .stats-card h4 {
-            font-size: 2rem;
-            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 900;
             margin-bottom: 0.5rem;
+            line-height: 1;
+            letter-spacing: -0.02em;
+            color: #ffffff !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
         }
 
+        .stats-card p {
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: -0.01em;
+            color: #ffffff !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .stats-card i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #ffffff !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        /* OKUNUR TABLO SİSTEMİ */
         .table {
-            border: 2px solid var(--black);
-            border-radius: 0 !important;
-            background: var(--white);
-            box-shadow: none;
+            border: 3px solid #ffffff;
+            border-radius: 16px !important;
+            background: #1a1a1a;
+            box-shadow: 0 8px 32px rgba(255, 255, 255, 0.1);
+            overflow: hidden;
         }
 
         .table thead th {
-            background: var(--black);
-            color: var(--white);
+            background: #ffffff;
+            color: #000000;
             border: none;
-            font-weight: 600;
-            font-size: 0.9rem;
-            text-transform: none;
-            letter-spacing: normal;
-            padding: 1rem 0.75rem;
+            font-family: 'Inter', sans-serif;
+            font-weight: 900;
+            font-size: 1rem;
+            padding: 1.5rem 1.25rem;
+            text-transform: uppercase;
+            letter-spacing: -0.01em;
+            position: relative;
         }
 
-        .table tbody tr {
-            border-bottom: 1px solid var(--border-color);
+        .table thead th:first-child {
+            border-top-left-radius: 16px;
         }
 
-        .table tbody tr:hover {
-            background: var(--gray-light);
-            transform: none;
+        .table thead th:last-child {
+            border-top-right-radius: 16px;
         }
 
         .table tbody td {
-            padding: 1rem 0.75rem;
+            font-family: 'Inter', sans-serif;
+            padding: 1.5rem 1.25rem;
+            border-bottom: 2px solid #333333;
             vertical-align: middle;
-            color: var(--black);
-            font-weight: 400;
+            color: #ffffff !important;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            background: #1a1a1a;
+        }
+
+        .table tbody tr:hover {
+            background: #2a2a2a !important;
+        }
+
+        .table tbody tr:hover td {
+            background: #2a2a2a;
+            color: #ffffff !important;
+        }
+
+        .table tbody tr:last-child td {
+            border-bottom: none;
         }
 
         .barcode-input {
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            background: var(--gray-light);
-            border: 1px solid var(--border-color);
-            border-radius: 0 !important;
-            padding: 0.25rem 0.5rem;
-            color: var(--black);
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            font-weight: 600;
+            background: #000000;
+            border: 2px solid #333333;
+            border-radius: 8px !important;
+            padding: 0.75rem 1rem;
+            color: #ffffff;
+            font-size: 1rem;
         }
 
         .badge {
@@ -289,56 +466,80 @@
         }
 
         .alert {
-            border: 2px solid var(--black);
-            border-radius: 0 !important;
-            box-shadow: none;
-            font-weight: 500;
-        }
-
-        .alert-success {
-            background: var(--white);
-            color: var(--black);
-            border-color: var(--black);
-        }
-
-        .alert-danger {
-            background: var(--black);
-            color: var(--white);
-            border-color: var(--black);
-        }
-
-        .alert-warning {
-            background: var(--gray-light);
-            color: var(--black);
-            border-color: var(--black);
-        }
-
-        .alert-info {
-            background: var(--white);
-            color: var(--black);
-            border-color: var(--black);
-        }
-
-        .form-control, .form-select {
-            border-radius: 0 !important;
-            border: 2px solid var(--black);
-            padding: 0.75rem;
-            background: var(--white);
-            color: var(--black);
+            border: 2px solid #ffffff;
+            border-radius: 12px !important;
+            box-shadow: 0 4px 16px rgba(255, 255, 255, 0.1);
+            font-weight: 700;
             font-size: 1rem;
         }
 
+        .alert-success {
+            background: #1a2a1a;
+            color: #ffffff;
+            border-color: #00ff00;
+        }
+
+        .alert-danger {
+            background: #2a1a1a;
+            color: #ffffff;
+            border-color: #ff0000;
+        }
+
+        .alert-warning {
+            background: #2a2a1a;
+            color: #ffffff;
+            border-color: #ffff00;
+        }
+
+        .alert-info {
+            background: #1a1a2a;
+            color: #ffffff;
+            border-color: #00ffff;
+        }
+
+        /* OKUNUR FORM KONTROLLARI */
+        .form-control, .form-select {
+            font-family: 'Inter', sans-serif;
+            border-radius: 12px !important;
+            border: 3px solid #ffffff;
+            padding: 1rem 1.25rem;
+            background: #1a1a1a;
+            color: #ffffff !important;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
         .form-control:focus, .form-select:focus {
-            border-color: var(--black);
-            box-shadow: none;
-            transform: none;
-            background: var(--gray-light);
+            border-color: #ffffff;
+            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.2);
+            outline: none;
+            background: #1a1a1a;
+            color: #ffffff !important;
+        }
+
+        .form-control:hover, .form-select:hover {
+            border-color: #ffffff;
+            background: #1a1a1a;
+            color: #ffffff !important;
         }
 
         .form-label {
-            font-weight: 600;
-            color: var(--black);
-            margin-bottom: 0.5rem;
+            font-family: 'Inter', sans-serif;
+            font-weight: 800;
+            color: #ffffff !important;
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+            letter-spacing: -0.01em;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .form-text {
+            font-family: 'Inter', sans-serif;
+            color: #ffffff !important;
+            font-size: 0.95rem;
+            font-weight: 700;
+            opacity: 0.9;
         }
 
         .footer {
@@ -349,34 +550,303 @@
             border: none;
         }
 
-        /* Mobil optimizasyonları */
+        /* Text Utilities - Daha Okunur */
+        .text-muted {
+            color: #ffffff !important;
+            opacity: 0.8;
+            font-weight: 600 !important;
+        }
+
+        .text-success {
+            color: #00ff00 !important;
+            font-weight: 700 !important;
+        }
+
+        .text-danger {
+            color: #ff4444 !important;
+            font-weight: 700 !important;
+        }
+
+        .text-warning {
+            color: #ffff00 !important;
+            font-weight: 700 !important;
+        }
+
+        .text-info {
+            color: #00ffff !important;
+            font-weight: 700 !important;
+        }
+
+        /* MOBİL UYUMLULUK - RESPONSIVE DESIGN */
         @media (max-width: 768px) {
+            /* Genel mobil düzenlemeler */
+            .container {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+            
             .card {
                 margin-bottom: 1rem;
+                border-radius: 12px !important;
+            }
+            
+            .card-body {
+                padding: 1.5rem 1rem;
             }
             
             .btn-group-custom {
                 justify-content: center;
+                flex-direction: column;
+                gap: 0.5rem;
             }
             
+            .btn-group-custom .btn {
+                width: 100%;
+                margin: 0;
+            }
+            
+            /* Navbar mobil */
+            .navbar-brand {
+                font-size: 1.5rem;
+            }
+            
+            .nav-link {
+                padding: 0.75rem 1rem !important;
+                text-align: center;
+            }
+            
+            /* Form elemanları mobil */
+            .form-control, .form-select {
+                font-size: 16px; /* iOS zoom'u önler */
+                padding: 1rem;
+            }
+            
+            .form-label {
+                font-size: 1rem;
+                margin-bottom: 0.5rem;
+            }
+            
+            /* Tablo mobil */
+            .table-responsive {
+                border-radius: 12px;
+                overflow-x: auto;
+            }
+            
+            .table {
+                font-size: 0.9rem;
+            }
+            
+            .table thead th {
+                padding: 1rem 0.75rem;
+                font-size: 0.8rem;
+            }
+            
+            .table tbody td {
+                padding: 1rem 0.75rem;
+                font-size: 0.85rem;
+            }
+            
+            /* İstatistik kartları mobil */
             .stats-card {
                 margin-bottom: 1rem;
             }
             
-            .table-responsive {
-                border: 2px solid var(--black);
-            }
-
             .stats-card h4 {
-                font-size: 1.5rem;
+                font-size: 2.5rem;
+            }
+            
+            .stats-card p {
+                font-size: 0.9rem;
+            }
+            
+            /* Butonlar mobil */
+            .btn {
+                padding: 0.875rem 1.5rem;
+                font-size: 0.95rem;
+            }
+            
+            .btn-lg {
+                padding: 1rem 2rem;
+                font-size: 1.1rem;
+            }
+        }
+        
+        /* Çok küçük ekranlar (telefon) */
+        @media (max-width: 576px) {
+            .container {
+                padding-left: 5px;
+                padding-right: 5px;
+            }
+            
+            .card-body {
+                padding: 1rem 0.75rem;
+            }
+            
+            .navbar-brand {
+                font-size: 1.3rem;
+            }
+            
+            .stats-card h4 {
+                font-size: 2rem;
+            }
+            
+            .btn {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+            
+            /* Kamera modal mobil */
+            .modal-dialog {
+                margin: 0.5rem;
+            }
+            
+            #scanner-container {
+                height: 300px;
+                max-width: 100%;
+            }
+            
+            .scanner-frame {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .scan-info {
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                padding: 8px 12px;
+                font-size: 11px;
+            }
+        }
+        
+        /* Landscape telefon */
+        @media (max-width: 768px) and (orientation: landscape) {
+            #scanner-container {
+                height: 250px;
+            }
+            
+            .scanner-frame {
+                width: 180px;
+                height: 180px;
+            }
+        }
+        
+        /* Touch optimizasyonları */
+        @media (hover: none) and (pointer: coarse) {
+            .btn {
+                min-height: 44px; /* Apple'ın önerdiği minimum touch target */
+            }
+            
+            .nav-link {
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .form-control, .form-select {
+                min-height: 44px;
+            }
+            
+            /* Hover efektlerini kaldır */
+            .card:hover {
+                transform: none;
+                box-shadow: 0 8px 32px rgba(255, 255, 255, 0.1);
+            }
+            
+            .btn:hover {
+                transform: none;
             }
         }
 
-        /* Kamera modal stilleri */
+        /* Kamera konteyner stili */
+        #scanner-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            height: 450px;
+            margin: 0 auto;
+            border: 3px solid #333333;
+            border-radius: 20px;
+            background: #000000;
+            overflow: hidden;
+            box-shadow: 
+                0 0 30px rgba(0, 0, 0, 0.8),
+                inset 0 0 30px rgba(0, 0, 0, 0.5);
+        }
+
+        #scanner-container canvas,
+        #scanner-container video {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover;
+            border-radius: 17px;
+        }
+
+        /* Floating kamera butonu */
+        .barcode-scanner-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50% !important;
+            background: #ffffff;
+            color: #000000;
+            border: 3px solid #000000;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .barcode-scanner-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Modal stili */
         .camera-modal .modal-content {
-            border: 2px solid var(--black);
-            border-radius: 0 !important;
-            box-shadow: none;
+            background: #1a1a1a;
+            border: 3px solid #ffffff;
+            border-radius: 16px;
+        }
+
+        .camera-modal .modal-header {
+            background: #ffffff;
+            color: #000000;
+            border-bottom: 2px solid #333333;
+        }
+
+        .camera-modal .modal-body {
+            background: #1a1a1a;
+            color: #ffffff;
+        }
+
+        .camera-modal .modal-footer {
+            background: #1a1a1a;
+            border-top: 2px solid #333333;
+        }
+
+        .camera-modal .btn-close {
+            filter: invert(1);
+        }
+
+        /* Navbar stili */
+        .navbar {
+            background: #000000 !important;
+            border-bottom: 2px solid #333333;
+            padding: 1.5rem 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
         }
 
         .modal-header {
@@ -397,13 +867,218 @@
 
         .camera-preview {
             width: 100%;
-            max-width: 400px;
-            height: 300px;
+            max-width: 600px;
+            height: 450px;
             border: 2px solid var(--black);
             border-radius: 0 !important;
             background: var(--black);
             margin: 0 auto;
             display: block;
+        }
+        
+        /* Barkod tarama alanı */
+        #scanner-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            height: 450px;
+            margin: 0 auto;
+            border: 2px solid var(--black);
+            background: var(--black);
+        }
+        
+        #scanner-container canvas,
+        #scanner-container video {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover;
+            border-radius: 17px;
+        }
+
+        /* TARAMA BİLGİ PANELİ */
+        .scan-info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #00ff00;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            z-index: 25;
+            border: 1px solid #00ff00;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+        }
+
+        .scan-info .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #00ff00;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: statusPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        /* PROFESYONEL LAZER TARAMA SİSTEMİ */
+        .scanner-frame {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 280px;
+            height: 280px;
+            border: 3px solid #00ff00;
+            border-radius: 20px;
+            z-index: 15;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 0, 0.5),
+                inset 0 0 20px rgba(0, 255, 0, 0.2);
+        }
+
+        .scanner-corners {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .scanner-corner {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 4px solid #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+        }
+
+        .scanner-corner.top-left {
+            top: -3px;
+            left: -3px;
+            border-right: none;
+            border-bottom: none;
+            border-top-left-radius: 20px;
+        }
+
+        .scanner-corner.top-right {
+            top: -3px;
+            right: -3px;
+            border-left: none;
+            border-bottom: none;
+            border-top-right-radius: 20px;
+        }
+
+        .scanner-corner.bottom-left {
+            bottom: -3px;
+            left: -3px;
+            border-right: none;
+            border-top: none;
+            border-bottom-left-radius: 20px;
+        }
+
+        .scanner-corner.bottom-right {
+            bottom: -3px;
+            right: -3px;
+            border-left: none;
+            border-top: none;
+            border-bottom-right-radius: 20px;
+        }
+
+        /* ANİMASYONLU LAZER ÇIZGISI */
+        .laser-line {
+            position: absolute;
+            left: 20px;
+            right: 20px;
+            height: 3px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                #ff0000 20%, 
+                #ff4444 50%, 
+                #ff0000 80%, 
+                transparent 100%);
+            box-shadow: 
+                0 0 10px #ff0000,
+                0 0 20px #ff0000,
+                0 0 30px #ff0000;
+            z-index: 20;
+            animation: laserScan 2.5s ease-in-out infinite;
+        }
+
+        @keyframes laserScan {
+            0% {
+                top: 20px;
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            50% {
+                top: 50%;
+                transform: translateY(-50%);
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                top: calc(100% - 23px);
+                opacity: 0;
+            }
+        }
+
+        /* TARAMA DURUMU GÖSTERGELERİ */
+        .scan-status {
+            position: absolute;
+            bottom: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #00ff00;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+            z-index: 25;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+            animation: scanStatusBlink 1.5s ease-in-out infinite;
+        }
+
+        @keyframes scanStatusBlink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+
+        /* BAŞARILI TARAMA EFEKTI */
+        .scan-success {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 255, 0, 0.2);
+            border-radius: 20px;
+            z-index: 30;
+            animation: scanSuccessFlash 0.8s ease-out;
+            display: none;
+        }
+
+        @keyframes scanSuccessFlash {
+            0% { 
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            50% { 
+                opacity: 1;
+                transform: scale(1.1);
+            }
+            100% { 
+                opacity: 0;
+                transform: scale(1);
+            }
         }
 
         .barcode-scanner-btn {
@@ -488,8 +1163,8 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('index') }}">
-                <i class="fas fa-boxes me-2"></i>Stok Takip Sistemi
+            <a class="navbar-brand" href="{{ url_for('dashboard') }}">
+                <i class="fas fa-warehouse me-2"></i>Çeliker Stok Sayım
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -497,8 +1172,8 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('index') }}">
-                            <i class="fas fa-home me-1"></i>Ana Sayfa
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">
+                            <i class="fas fa-home me-1"></i>Dashboard
                         </a>
                     </li>
                     <li class="nav-item">
@@ -525,12 +1200,35 @@
                         </ul>
                     </li>
                 </ul>
-                <form class="d-flex" method="GET" action="{{ url_for('ara') }}">
+                {% if current_user.is_authenticated %}
+                <form class="d-flex me-3" method="GET" action="{{ url_for('ara') }}">
                     <input class="form-control me-2" type="search" name="q" placeholder="Ürün adı veya barkod..." aria-label="Search">
                     <button class="btn btn-outline-light" type="submit">
                         <i class="fas fa-search"></i>
                     </button>
                 </form>
+                
+                <!-- User Menu -->
+                <div class="dropdown">
+                    <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user me-2"></i>{{ current_user.get_full_name() }}
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><h6 class="dropdown-header">{{ current_user.username }}</h6></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{ url_for('dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('urun_listesi') }}">
+                            <i class="fas fa-list me-2"></i>Ürün Listesi
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}">
+                            <i class="fas fa-sign-out-alt me-2"></i>Çıkış Yap
+                        </a></li>
+                    </ul>
+                </div>
+                {% endif %}
             </div>
         </div>
     </nav>
@@ -569,7 +1267,9 @@
                     <div class="mb-3">
                         <p class="text-muted">Barkodu kamera görüntüsü içinde ortalayın</p>
                     </div>
-                    <video id="cameraPreview" class="camera-preview" autoplay muted playsinline></video>
+                    <div id="scanner-container">
+                        <div class="scan-line"></div>
+                    </div>
                     <div class="mt-3">
                         <div id="scanResult" class="alert alert-success d-none">
                             <i class="fas fa-check-circle me-2"></i>
@@ -605,11 +1305,8 @@
     <footer class="footer mt-auto">
         <div class="container">
             <div class="row">
-                <div class="col-md-6">
-                    <p class="mb-0">&copy; 2024 Stok Takip Sistemi. Tüm hakları saklıdır.</p>
-                </div>
-                <div class="col-md-6 text-end">
-                    <p class="mb-0">Python Flask ile geliştirilmiştir.</p>
+                <div class="col-12 text-center">
+                    <p class="mb-0">&copy; 2024 Çeliker Stok Sayım Sistemi. Tüm hakları saklıdır.</p>
                 </div>
             </div>
         </div>
@@ -621,14 +1318,9 @@
     <!-- Barkod Okuyucu Script -->
     <script>
         let barcodeBuffer = '';
-        let barcodeTimeout;
-        let codeReader = null;
-        let currentStream = null;
-        let cameras = [];
-        let currentCameraIndex = 0;
+        let isScanning = false;
         let lastScannedBarcode = '';
-        
-        // Klavye barkod okuyucu
+        let barcodeTimeout = null;
         document.addEventListener('keydown', function(e) {
             // Eğer bir input alanında değilsek barkod okumayı aktif et
             if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
@@ -651,40 +1343,62 @@
             }
         });
         
-        // Kamera barkod okuyucu
+        // Modern Barkod Okuyucu
         document.addEventListener('DOMContentLoaded', function() {
-            // ZXing kütüphanesi yüklenmesini bekle
-            function initializeCamera() {
-                if (typeof ZXing !== 'undefined') {
-                    try {
-                        codeReader = new ZXing.BrowserMultiFormatReader();
-                        console.log('ZXing initialized successfully');
-                        
-                        // Kamera listesini al
-                        codeReader.listVideoInputDevices()
-                            .then((videoInputDevices) => {
-                                cameras = videoInputDevices;
-                                console.log('Cameras found:', cameras.length);
-                                if (cameras.length > 1) {
-                                    document.getElementById('switchCamera').style.display = 'inline-block';
-                                }
-                            })
-                            .catch((err) => {
-                                console.error('Kamera listesi alınamadı:', err);
-                                showError('Kamera bulunamadı: ' + err.message);
-                            });
-                    } catch (error) {
-                        console.error('ZXing initialization error:', error);
-                        showError('Barkod okuyucu başlatılamadı');
-                    }
-                } else {
-                    console.log('ZXing not loaded yet, retrying...');
-                    setTimeout(initializeCamera, 1000);
-                }
+            console.log('🚀 Modern barkod okuyucu başlatılıyor...');
+            
+            // QuaggaJS yüklendiğini kontrol et
+            if (typeof Quagga !== 'undefined') {
+                console.log('✅ QuaggaJS yüklendi');
+                initializeQuagga();
+            } else {
+                console.error('❌ QuaggaJS yüklenemedi');
+                // Fallback: Manual barcode input
+                setupManualBarcodeInput();
             }
             
-            // 2 saniye bekle ve başlat
-            setTimeout(initializeCamera, 2000);
+            function initializeQuagga() {
+                // QuaggaJS konfigürasyonu
+                window.quaggaConfig = {
+                    inputStream: {
+                        name: "Live",
+                        type: "LiveStream",
+                        target: null, // Will be set dynamically
+                        constraints: {
+                            width: { min: 640 },
+                            height: { min: 480 },
+                            facingMode: "environment",
+                            aspectRatio: { min: 1, max: 2 }
+                        }
+                    },
+                    decoder: {
+                        readers: [
+                            "code_128_reader",
+                            "ean_reader",
+                            "ean_8_reader", 
+                            "code_39_reader",
+                            "upc_reader",
+                            "upc_e_reader"
+                        ]
+                    },
+                    locate: true,
+                    locator: {
+                        patchSize: "medium",
+                        halfSample: true
+                    },
+                    numOfWorkers: navigator.hardwareConcurrency || 2,
+                    frequency: 10
+                };
+            }
+            
+            function setupManualBarcodeInput() {
+                console.log('📝 Manuel barkod girişi aktif');
+                // Hide camera buttons if QuaggaJS fails
+                const cameraButtons = document.querySelectorAll('[onclick*="openCameraModal"]');
+                cameraButtons.forEach(btn => {
+                    btn.style.display = 'none';
+                });
+            }
             
             // Floating kamera butonuna tıklama
             document.getElementById('openCameraBtn')?.addEventListener('click', function() {
@@ -717,94 +1431,309 @@
         });
         
         function openCameraModal() {
+            console.log('📱 Kamera modalı açılıyor...');
+            
+            // Check if camera is supported
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                showError('Bu tarayıcı kamera desteği sunmuyor');
+                return;
+            }
+            
             const modal = new bootstrap.Modal(document.getElementById('cameraModal'));
             modal.show();
             
             // Modal açıldıktan sonra kamerayı başlat
             setTimeout(() => {
                 startCamera();
-            }, 500);
+            }, 800);
         }
         
         function startCamera() {
-            console.log('Starting camera...');
+            console.log('🎥 Modern kamera başlatılıyor...');
             
-            if (!codeReader) {
-                showError('Barkod okuyucu henüz hazır değil');
+            if (isScanning) {
+                console.log('⚠️ Zaten tarama aktif');
                 return;
             }
             
-            if (cameras.length === 0) {
-                showError('Kamera bulunamadı');
-                return;
-            }
-            
-            const selectedDeviceId = cameras[currentCameraIndex]?.deviceId;
-            const videoElement = document.getElementById('cameraPreview');
-            
-            console.log('Using camera:', selectedDeviceId);
-            
-            // Önceki stream'i durdur
+            // Önceki taramayı durdur
             stopCamera();
             
-            // Kamera erişim izni kontrol et - daha iyi ayarlarla
-            navigator.mediaDevices.getUserMedia({ 
-                video: { 
-                    facingMode: 'environment', // Arka kamera tercih et
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 }
-                } 
-            })
-                .then(() => {
-                    console.log('Camera permission granted');
+            isScanning = true;
+            hideError();
+            
+            // Check QuaggaJS availability
+            if (typeof Quagga === 'undefined') {
+                showError('Barkod okuyucu yüklenemedi. Manuel olarak barkod girin.');
+                isScanning = false;
+                return;
+            }
+            
+            // Set target for QuaggaJS
+            const scannerContainer = document.querySelector('#scanner-container');
+            if (!scannerContainer) {
+                showError('Tarayıcı konteyner bulunamadı');
+                isScanning = false;
+                return;
+            }
+            
+            // Clear previous content and setup laser system
+            scannerContainer.innerHTML = `
+                <!-- Tarama Bilgi Paneli -->
+                <div class="scan-info">
+                    <span class="status-dot"></span>
+                    <span id="scan-status-text">Kamera başlatılıyor...</span>
+                </div>
+                
+                <!-- Profesyonel Tarama Çerçevesi -->
+                <div class="scanner-frame">
+                    <div class="scanner-corners">
+                        <div class="scanner-corner top-left"></div>
+                        <div class="scanner-corner top-right"></div>
+                        <div class="scanner-corner bottom-left"></div>
+                        <div class="scanner-corner bottom-right"></div>
+                    </div>
                     
-                    codeReader.decodeFromVideoDevice(selectedDeviceId, videoElement, (result, err) => {
-                        if (result) {
-                            const barcode = result.text;
-                            console.log('✅ Barkod bulundu:', barcode);
-                            lastScannedBarcode = barcode;
-                            showScanResult(barcode);
-                            
-                            // Titreşim efekti (destekleniyorsa)
-                            if (navigator.vibrate) {
-                                navigator.vibrate([200, 100, 200]);
-                            }
-                            
-                            // Ses efekti (opsiyonel)
-                            try {
-                                const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT');
-                                audio.play().catch(() => {}); // Ses çalmazsa sessizce devam et
-                            } catch(e) {}
+                    <!-- Animasyonlu Lazer Çizgisi -->
+                    <div class="laser-line"></div>
+                    
+                    <!-- Tarama Durumu -->
+                    <div class="scan-status">BARKOD ARANIYOR...</div>
+                    
+                    <!-- Başarı Efekti -->
+                    <div class="scan-success" id="scan-success-effect"></div>
+                </div>
+            `;
+            
+            // Gelişmiş QuaggaJS konfigürasyonu - Daha iyi barkod okuma
+            const config = {
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    target: scannerContainer,
+                    constraints: {
+                        width: { min: 480, ideal: 800, max: 1280 },
+                        height: { min: 320, ideal: 600, max: 720 },
+                        facingMode: "environment", // Arka kamera
+                        aspectRatio: { min: 1, max: 2 }
+                    },
+                    area: { // Tarama alanını sınırla
+                        top: "20%",
+                        right: "20%", 
+                        left: "20%",
+                        bottom: "20%"
+                    }
+                },
+                decoder: {
+                    readers: [
+                        "code_128_reader",    // En yaygın
+                        "ean_reader",         // EAN-13
+                        "ean_8_reader",       // EAN-8
+                        "code_39_reader",     // Code 39
+                        "code_39_vin_reader", // Code 39 VIN
+                        "codabar_reader",     // Codabar
+                        "upc_reader",         // UPC-A
+                        "upc_e_reader",       // UPC-E
+                        "i2of5_reader",       // Interleaved 2 of 5
+                        "2of5_reader",        // Standard 2 of 5
+                        "code_93_reader"      // Code 93
+                    ],
+                    debug: {
+                        drawBoundingBox: true,
+                        showFrequency: true,
+                        drawScanline: true,
+                        showPattern: true
+                    }
+                },
+                locator: {
+                    patchSize: "large",      // Daha büyük patch
+                    halfSample: false        // Tam örnekleme
+                },
+                numOfWorkers: Math.min(navigator.hardwareConcurrency || 4, 8), // Daha fazla worker
+                frequency: 20,               // Daha sık tarama
+                locate: true,
+                debug: {
+                    showCanvas: false,
+                    showPatches: false,
+                    showFoundPatches: false,
+                    showSkeleton: false,
+                    showLabels: false,
+                    showPatchLabels: false,
+                    showRemainingPatchLabels: false,
+                    boxFromPatches: {
+                        showTransformed: false,
+                        showTransformedBox: false,
+                        showBB: false
+                    }
+                }
+            };
+            
+            Quagga.init(config, function(err) {
+                if (err) {
+                    console.error('❌ QuaggaJS başlatma hatası:', err);
+                    let errorMsg = 'Kamera başlatılamadı';
+                    
+                    if (err.name === 'NotAllowedError') {
+                        errorMsg = 'Kamera izni verilmedi. Lütfen kamera erişimine izin verin.';
+                    } else if (err.name === 'NotFoundError') {
+                        errorMsg = 'Kamera bulunamadı. Cihazınızda kamera olduğundan emin olun.';
+                    } else if (err.name === 'NotReadableError') {
+                        errorMsg = 'Kamera kullanımda. Diğer uygulamaları kapatıp tekrar deneyin.';
+                    }
+                    
+                    showError(errorMsg);
+                    isScanning = false;
+                    return;
+                }
+                
+                console.log('✅ QuaggaJS başarıyla başlatıldı');
+                updateScanStatus('Kamera aktif - Barkod aranıyor...', 'scanning');
+                
+                try {
+                    Quagga.start();
+                    
+                    // Gelişmiş barkod algılama sistemi
+                    let detectionCount = {};
+                    let detectionThreshold = 3; // 3 kez aynı barkod algılanmalı
+                    
+                    Quagga.onDetected(function(result) {
+                        if (!result || !result.codeResult) {
+                            console.log('⚠️ Geçersiz barkod sonucu');
+                            return;
                         }
                         
-                        if (err && !(err instanceof ZXing.NotFoundException)) {
-                            console.warn('Barkod arama devam ediyor...', err.name);
+                        const barcode = result.codeResult.code;
+                        const format = result.codeResult.format;
+                        const quality = result.codeResult.decodedCodes.reduce((sum, code) => sum + (code.error || 0), 0);
+                        
+                        console.log(`🔍 Barkod algılandı: ${barcode} (Format: ${format}, Kalite: ${quality.toFixed(2)})`);
+                        
+                        // Kalite kontrolü - çok düşük kaliteli okumalar atla
+                        if (quality > 0.5) {
+                            console.log('⚠️ Düşük kalite, atlanıyor');
+                            return;
                         }
-                    })
-                    .then((stream) => {
-                        currentStream = stream;
-                        console.log('Camera started successfully');
-                        hideError();
-                    })
-                    .catch((err) => {
-                        console.error('ZXing decode error:', err);
-                        showError('Barkod okuyucu başlatılamadı: ' + err.message);
+                        
+                        // Barkod sayacı
+                        if (!detectionCount[barcode]) {
+                            detectionCount[barcode] = 0;
+                        }
+                        detectionCount[barcode]++;
+                        
+                        console.log(`📊 ${barcode} - ${detectionCount[barcode]}/${detectionThreshold} algılama`);
+                        
+                        // Eşik değerine ulaştığında kabul et
+                        if (detectionCount[barcode] >= detectionThreshold) {
+                            console.log('✅ Barkod onaylandı:', barcode);
+                            
+                            // Aynı barkodu tekrar okumayı önle
+                            if (lastScannedBarcode === barcode) {
+                                console.log('⚠️ Aynı barkod zaten okundu');
+                                return;
+                            }
+                            
+                            lastScannedBarcode = barcode;
+                            
+                            // Sayacı temizle
+                            detectionCount = {};
+                            
+                            // Sonucu göster
+                            showScanResult(barcode);
+                            
+                            // Feedback effects
+                            try {
+                                // Vibration
+                                if (navigator.vibrate) {
+                                    navigator.vibrate([200, 100, 200, 100, 200]);
+                                }
+                                
+                                // Visual feedback
+                                scannerContainer.style.border = '4px solid #00ff00';
+                                setTimeout(() => {
+                                    if (scannerContainer) {
+                                        scannerContainer.style.border = '3px solid #333333';
+                                    }
+                                }, 2000);
+                                
+                                // Audio feedback
+                                try {
+                                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                                    const oscillator = audioContext.createOscillator();
+                                    const gainNode = audioContext.createGain();
+                                    
+                                    oscillator.connect(gainNode);
+                                    gainNode.connect(audioContext.destination);
+                                    
+                                    oscillator.frequency.value = 800;
+                                    oscillator.type = 'sine';
+                                    
+                                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                                    
+                                    oscillator.start(audioContext.currentTime);
+                                    oscillator.stop(audioContext.currentTime + 0.3);
+                                } catch(audioErr) {
+                                    console.log('Ses efekti hatası:', audioErr);
+                                }
+                                
+                            } catch(e) {
+                                console.log('Feedback efekti hatası:', e);
+                            }
+                            
+                            // Kamerayı durdur
+                            setTimeout(() => {
+                                stopCamera();
+                            }, 2000);
+                        }
                     });
-                })
-                .catch((err) => {
-                    console.error('Camera permission denied:', err);
-                    showError('Kamera izni gerekli. Lütfen tarayıcı ayarlarından kamera erişimini açın.');
-                });
+                    
+                    // Hata durumlarını yakala
+                    Quagga.onProcessed(function(result) {
+                        const drawingCtx = Quagga.canvas.ctx.overlay;
+                        const drawingCanvas = Quagga.canvas.dom.overlay;
+                        
+                        if (result) {
+                            // Algılanan çizgileri göster
+                            if (result.boxes) {
+                                drawingCtx.clearRect(0, 0, parseInt(drawingCanvas.getAttribute("width")), parseInt(drawingCanvas.getAttribute("height")));
+                                result.boxes.filter(function (box) {
+                                    return box !== result.box;
+                                }).forEach(function (box) {
+                                    Quagga.ImageDebug.drawPath(box, {x: 0, y: 1}, drawingCtx, {color: "green", lineWidth: 2});
+                                });
+                            }
+                            
+                            // Ana kutuyu göster
+                            if (result.box) {
+                                Quagga.ImageDebug.drawPath(result.box, {x: 0, y: 1}, drawingCtx, {color: "#00F", lineWidth: 2});
+                            }
+                            
+                            // Barkod çizgilerini göster
+                            if (result.codeResult && result.codeResult.code) {
+                                Quagga.ImageDebug.drawPath(result.line, {x: 'x', y: 'y'}, drawingCtx, {color: 'red', lineWidth: 3});
+                            }
+                        }
+                    });
+                    
+                } catch(startErr) {
+                    console.error('❌ Kamera başlatma hatası:', startErr);
+                    showError('Kamera başlatılamadı');
+                    isScanning = false;
+                }
+            });
         }
         
         function stopCamera() {
-            if (currentStream) {
-                currentStream.getTracks().forEach(track => track.stop());
-                currentStream = null;
-            }
+            console.log('🛑 Kamera durduruluyor...');
             
-            if (codeReader) {
-                codeReader.reset();
+            if (isScanning) {
+                try {
+                    Quagga.stop();
+                    console.log('✅ QuaggaJS durduruldu');
+                } catch(e) {
+                    console.error('QuaggaJS durdurma hatası:', e);
+                }
+                isScanning = false;
             }
             
             hideScanResult();
@@ -812,29 +1741,200 @@
         }
         
         function switchCamera() {
-            if (cameras.length > 1) {
-                currentCameraIndex = (currentCameraIndex + 1) % cameras.length;
+            console.log('🔄 Kamera değiştiriliyor...');
+            stopCamera();
+            setTimeout(() => {
                 startCamera();
+            }, 1000);
+        }
+        
+        // PROFESYONEL LAZER SİSTEMİ FONKSİYONLARI
+        function updateScanStatus(message, type = 'scanning') {
+            const statusText = document.getElementById('scan-status-text');
+            const statusDot = document.querySelector('.status-dot');
+            const scanStatus = document.querySelector('.scan-status');
+            
+            if (statusText) {
+                statusText.textContent = message;
+            }
+            
+            if (statusDot) {
+                statusDot.style.background = type === 'success' ? '#00ff00' : 
+                                           type === 'error' ? '#ff0000' : '#00ff00';
+            }
+            
+            if (scanStatus) {
+                scanStatus.textContent = type === 'scanning' ? 'BARKOD ARANIYOR...' :
+                                        type === 'success' ? 'BARKOD BULUNDU!' :
+                                        type === 'error' ? 'HATA OLUŞTU!' : 'HAZIR';
+                scanStatus.style.color = type === 'success' ? '#00ff00' :
+                                        type === 'error' ? '#ff0000' : '#00ff00';
             }
         }
         
         function showScanResult(barcode) {
-            console.log('🎯 Barkod işleniyor:', barcode);
+            // Başarı efekti göster
+            const successEffect = document.getElementById('scan-success-effect');
+            if (successEffect) {
+                successEffect.style.display = 'block';
+                successEffect.style.animation = 'scanSuccessFlash 0.8s ease-out';
+                
+                setTimeout(() => {
+                    successEffect.style.display = 'none';
+                }, 800);
+            }
             
-            document.getElementById('scannedBarcode').textContent = barcode;
-            document.getElementById('scanResult').classList.remove('d-none');
-            document.getElementById('useBarcode').style.display = 'inline-block';
+            // Lazer çizgisini yeşil yap
+            const laserLine = document.querySelector('.laser-line');
+            if (laserLine) {
+                laserLine.style.background = 'linear-gradient(90deg, transparent 0%, #00ff00 20%, #44ff44 50%, #00ff00 80%, transparent 100%)';
+                laserLine.style.boxShadow = '0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00';
+                
+                setTimeout(() => {
+                    laserLine.style.background = 'linear-gradient(90deg, transparent 0%, #ff0000 20%, #ff4444 50%, #ff0000 80%, transparent 100%)';
+                    laserLine.style.boxShadow = '0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000';
+                }, 2000);
+            }
             
-            // Toast bildirimi göster
-            showToast(`✅ Barkod okundu: ${barcode}`, 'success');
+            // Durum güncelle
+            updateScanStatus('Barkod başarıyla okundu!', 'success');
             
-            // 3 saniye sonra otomatik kullan
-            setTimeout(() => {
-                if (lastScannedBarcode === barcode) {
-                    document.getElementById('useBarcode').click();
+            // Sonuç göster
+            const resultDiv = document.getElementById('scanResult');
+            const barcodeSpan = document.getElementById('scannedBarcode');
+            const useButton = document.getElementById('useBarcode');
+            
+            if (resultDiv && barcodeSpan) {
+                barcodeSpan.textContent = barcode;
+                resultDiv.classList.remove('d-none');
+                hideError();
+                
+                if (useButton) {
+                    useButton.style.display = 'inline-block';
+                    useButton.onclick = function() {
+                        handleBarcodeScanned(barcode);
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('cameraModal'));
+                        if (modal) modal.hide();
+                    };
                 }
-            }, 3000);
+            }
         }
+        
+        function showError(message) {
+            // Durum güncelle
+            updateScanStatus(message, 'error');
+            
+            // Lazer çizgisini kırmızı yap
+            const laserLine = document.querySelector('.laser-line');
+            if (laserLine) {
+                laserLine.style.background = 'linear-gradient(90deg, transparent 0%, #ff0000 20%, #ff4444 50%, #ff0000 80%, transparent 100%)';
+                laserLine.style.boxShadow = '0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000';
+                laserLine.style.animationPlayState = 'paused';
+            }
+            
+            const errorDiv = document.getElementById('scanError');
+            const errorMsg = document.getElementById('errorMessage');
+            
+            if (errorDiv && errorMsg) {
+                errorMsg.textContent = message;
+                errorDiv.classList.remove('d-none');
+                hideScanResult();
+            }
+            
+            console.error('📱 Kamera hatası:', message);
+        }
+        
+        function hideError() {
+            const errorDiv = document.getElementById('scanError');
+            if (errorDiv) {
+                errorDiv.classList.add('d-none');
+            }
+        }
+        
+        function hideScanResult() {
+            const resultDiv = document.getElementById('scanResult');
+            const useButton = document.getElementById('useBarcode');
+            
+            if (resultDiv) {
+                resultDiv.classList.add('d-none');
+            }
+            if (useButton) {
+                useButton.style.display = 'none';
+            }
+        }
+        
+        // Global functions - tüm sayfalarda kullanılabilir
+        window.openCameraModal = openCameraModal;
+        window.startCamera = startCamera;
+        window.stopCamera = stopCamera;
+        window.switchCamera = switchCamera;
+        
+        // Fallback function for pages that don't have handleBarcodeScanned
+        if (typeof handleBarcodeScanned === 'undefined') {
+            window.handleBarcodeScanned = function(barcode) {
+                console.log('📱 Barkod yakalandı:', barcode);
+                
+                // Try to find barcode input field
+                const barcodeInputs = document.querySelectorAll('input[name*="barkod"], input[id*="barkod"], .barcode-input');
+                if (barcodeInputs.length > 0) {
+                    barcodeInputs[0].value = barcode;
+                    barcodeInputs[0].focus();
+                    
+                    // Trigger input event for any listeners
+                    barcodeInputs[0].dispatchEvent(new Event('input', { bubbles: true }));
+                    
+                    // Show success message
+                    if (typeof showToast === 'function') {
+                        showToast('✅ Barkod başarıyla okundu: ' + barcode, 'success');
+                    }
+                } else {
+                    // Show in alert if no input found
+                    alert('Barkod: ' + barcode);
+                }
+            };
+        }
+        
+        // Test function for camera system
+        function testCameraSystem() {
+            console.log('🧪 Kamera sistemi test ediliyor...');
+            
+            if (typeof Quagga !== 'undefined') {
+                console.log('✅ QuaggaJS mevcut, versiyon:', Quagga.version || 'bilinmiyor');
+                console.log('📋 Desteklenen formatlar:', Quagga.decoders);
+            } else {
+                console.log('❌ QuaggaJS mevcut değil');
+            }
+            
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                console.log('✅ MediaDevices API mevcut');
+                
+                // Kamera cihazlarını listele
+                navigator.mediaDevices.enumerateDevices()
+                    .then(devices => {
+                        const cameras = devices.filter(device => device.kind === 'videoinput');
+                        console.log('📹 Bulunan kameralar:', cameras.length);
+                        cameras.forEach((camera, index) => {
+                            console.log(`  ${index + 1}. ${camera.label || 'Kamera ' + (index + 1)}`);
+                        });
+                    })
+                    .catch(err => console.log('Kamera listesi alınamadı:', err));
+            } else {
+                console.log('❌ MediaDevices API mevcut değil');
+            }
+            
+            // Test barkodu oluştur
+            console.log('🔍 Test için örnek barkodlar:');
+            console.log('  EAN-13: 1234567890123');
+            console.log('  Code128: TEST123');
+            console.log('  UPC-A: 012345678905');
+        }
+        
+        // Otomatik test çalıştır
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                testCameraSystem();
+            }, 1000);
+        });
         
         function hideScanResult() {
             document.getElementById('scanResult').classList.add('d-none');
